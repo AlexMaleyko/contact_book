@@ -1,0 +1,50 @@
+<web-app>
+    <display-name>Contacts book application</display-name>
+    <error-page>
+        <exception-type>java.lang.Exception</exception-type>
+        <location>/general-error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error404.html</location>
+    </error-page>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <filter>
+        <filter-name>com.itechart.maleiko.contact_book.web.CharsetFilter</filter-name>
+        <filter-class>com.itechart.maleiko.contact_book.web.CharsetFilter</filter-class>
+        <init-param>
+            <param-name>requestEncoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>com.itechart.maleiko.contact_book.web.CharsetFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>com.itechart.maleiko.contact_book.web.FrontController</servlet-name>
+        <display-name>com.itechart.maleiko.contact_book.web.FrontController</display-name>
+        <servlet-class>
+            com.itechart.maleiko.contact_book.web.FrontController
+        </servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>com.itechart.maleiko.contact_book.web.FrontController</servlet-name>
+        <url-pattern>/contact_book/*</url-pattern>
+    </servlet-mapping>
+  <!--  <context-param>
+        <param-name>javax.servlet.jsp.jstl.sql.dataSource</param-name>
+        <param-value>jdbc/shop1db</param-value>
+    </context-param>-->
+   <!-- <resource-ref>
+        <description>DB Connection</description>
+        <res-ref-name>jdbc/contactBook</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>-->
+</web-app>

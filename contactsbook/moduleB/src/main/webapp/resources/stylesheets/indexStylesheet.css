@@ -1,0 +1,114 @@
+html, body{
+    font-size: 14px;
+    height: 100%;
+}
+section{
+    background-color: white;
+    margin: auto;
+    width: 80%;
+}
+
+table{
+    width: 100%;
+    border-collapse: collapse;
+}
+tr:nth-child(even) {background-color: #f2f2f2}
+th,td{
+    border-bottom: 1px solid black;
+    padding: 10px;
+}
+th{
+    background-color: green;
+    color: white;
+    text-align: left;
+}
+div{
+    margin-bottom: 1em;
+    overflow: auto;
+    text-align:center;
+}
+div > button[type='submit']{
+    background-color: whitesmoke;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    padding: 10px;
+    float:left;
+    margin-left: 1px;
+    /*float: left для отсутствия пробелов между кнопками*/
+}
+div > button[type='submit']:hover{
+    color: white;
+    background-color: gold;
+}
+div > button[type='submit']:active {
+    background-color: darkgoldenrod;
+}
+button[type='submit']:disabled{
+    cursor: not-allowed;
+}
+input[type='text']{
+
+    float: right;
+    vertical-align: middle;
+    margin-top: 1em;
+}
+#deleteContact:disabled{
+    cursor: not-allowed;
+}
+
+
+#generalMsg {
+    color: red;
+    display: block;
+    margin-top: 10px;
+    clear: both;
+}
+
+#pagination{
+    margin: auto;
+    width: 50%;
+    overflow: visible;
+
+}
+#pagination .paginationBtn{
+    padding: 8px 16px;
+    color: black;
+    border: 1px solid;
+    background-color: white;
+    margin-left: 3px;
+    cursor: pointer;
+    display: inline-block;
+    float: none;
+}
+#pagination .paginationBtn:hover{
+    box-shadow: 0px 16px 13px 0px rgba(50, 50, 50, 0.75);
+    font-size: 20px;
+}
+#pagination .active{
+    background-color: green;
+    color: white;
+    margin-left: 3px;
+    float: none;
+    cursor: pointer;
+    padding: 8px 16px;
+    box-shadow: 0px 16px 13px 0px rgba(50, 50, 50, 0.75);
+    font-size: 20px;
+}
+#backToList{
+    position:fixed;
+    width: 8%;
+    background-color: #e0e0d1;
+    height: 90%;
+    margin-left: 2px;
+    margin-top: 3%;
+    opacity: 0.5;
+    border-radius: 10px;
+    font-size: 4em;
+    display: none;
+}
+#backToList:hover{
+    opacity:1;
+    color: white;
+}

@@ -1,0 +1,24 @@
+#ignore root files and root directories
+/*
+/*/
+#except for:
+!/contactsbook/
+#blacklist everything
+*
+#whitelist all subdirs
+!*/
+#/contactsbook/.idea/
+/untitled/
+#allow files below:
+!*.java
+!web*.xml
+!pom.xml
+!context.xml
+!*.sql
+!*.gitignore
+!*.properties
+!index.jsp
+!contactForm.jsp
+!*.css
+!*.js
+!*.stg

@@ -1,0 +1,21 @@
+.error-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 0;
+    border: 2px solid #888;
+    width: 40%;
+    overflow: auto;
+}
+.error header, footer{
+    height: 1.2em;
+    width:100%;
+    background-color: green;
+    display: block;
+
+}
+#code{
+    text-align: center;
+}
+#message{
+    margin-left: 3%;
+}

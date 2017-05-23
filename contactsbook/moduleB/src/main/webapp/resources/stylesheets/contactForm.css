@@ -1,0 +1,179 @@
+table{
+    width: 100%;
+    border-collapse: collapse;
+}
+tr:nth-child(even) {background-color: #f2f2f2}
+th,td{
+    border-bottom: 1px solid black;
+    padding: 10px;
+}
+
+th{
+    background-color: green;
+    color: white;
+    text-align: left;
+}
+#container{
+    display: inline-block;
+    margin-left: 15%;
+    margin-right: 15%;
+    width: 70%;
+}
+#contact {
+    width: 50%;
+    float: left;
+}
+#associatedData{
+    margin-top: 100px;
+    float: left;
+    width: 49%;
+}
+#associatedData section{
+    margin-top: 100px;
+}
+#associatedData table{
+    table-layout: fixed;
+    width: 100%;
+    word-wrap: break-word;
+}
+#attachTable th:nth-child(1){
+    width: 9%;
+}
+
+#attachTable th:nth-child(2){
+    width: 26%;
+}
+#attachTable th:nth-child(3){
+    width: 26%;
+}
+#attachTable th:nth-child(4){
+    width: 39%;
+}
+#phoneTable th:nth-child(1){
+    width:10%;
+}
+#phoneTable th:nth-child(2){
+    width:30%;
+}
+#phoneTable th:nth-child(3){
+    width:15%;
+}
+#phoneTable th:nth-child(4){
+    width:45%;
+}
+#contact input[type=text] {
+    display: inline-block;
+    width: 100%;
+    padding: 10px 5px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 3px solid #ccc;
+    transition: 0.5s;
+    transition: 0.5s;
+    outline: none;
+}
+#contact input[type=text]:focus {
+    border: 3px solid #555;
+}
+#contact select{
+    padding: 9px 5px;
+    margin: 8px 10px;
+}
+#contactInfo{
+    width: 70%;
+    margin: auto;
+    overflow: auto;
+    max-height: 65%;
+}
+.contactBirth {
+    display: inline-block;
+    width: 18%;
+    padding: 10px 5px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 3px solid #ccc;
+    transition: 0.5s;
+    outline: none;
+}
+.contactBirth:focus {
+    border: 3px solid #555;
+}
+#yyyy{
+    width: 24%;
+}
+.phoneBtn, .attachmentBtn{
+    float:right;
+    margin-right: 2px;
+    margin-bottom:2px;
+}
+#associatedData div{
+    clear:both;
+    text-align:center;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+#profileImgContainer{
+    margin-top: 66px;
+    display:block;
+    margin-left:auto;
+    margin-right: auto;
+    width: 200px;
+    height:200px
+}
+#profileImg{
+    max-width: 100%;
+    max-height: 200px;
+    margin: auto;
+    display: block;
+}
+/* Кнопки сохраниения/удаления */
+#pgBtns button{
+    background-color: whitesmoke;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    padding: 10px;
+    float:left;
+    margin-left: 1px;
+}
+#pgBtns button:hover{
+    color: white;
+    background-color: gold;
+}
+#pgBtns button:active{
+    background-color: darkgoldenrod;
+}
+#pgBtns{
+   position: fixed;
+}
+
+@media screen and (max-width: 1100px){
+    #associatedData{
+        clear:both;
+    }
+    #container section{
+        width: 100%;
+    }
+    #associatedData section{
+        margin-top: 20px;
+    }
+    #contact input[type=text]{
+        width:100%;
+    }
+    img{
+        display: block;
+        margin:auto;
+        width: 100%;
+    }
+    #contact form{
+        display: inline;
+    }
+    #imgModal .modal-content{
+        width: 60%
+    }
+    #mdlImg{
+        width: 90%;
+    }
+
+}

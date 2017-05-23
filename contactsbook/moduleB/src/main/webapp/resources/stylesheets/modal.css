@@ -1,0 +1,271 @@
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 0;
+    border: 2px solid #888;
+    width: 40%; /* Could be more or less, depending on screen size */
+    overflow: auto;
+}
+
+#searchModal .modal-content{
+    margin-top: 10px;
+}
+
+#phoneModalName{
+    display: block;
+    text-align: center;
+    font-size: 1.5em;
+    margin-top: 0.5em;
+}
+
+.modal input[type=text] {
+    display: inline-block;
+    padding: 4px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 3px solid #ccc;
+    -webkit-transition: 0.5s;
+    transition: 0.5s;
+    outline: none;
+}
+
+.modal input[type=text]:focus {
+    border: 3px solid #555;
+}
+
+.modal select{
+    padding: 9px 5px;
+    margin: 8px 10px;
+}
+.comment{
+    display: block;
+    width: 80%;
+    margin: auto;
+    overflow: auto;
+
+}
+.comment span{
+    display: block;
+    text-align: left;
+}
+#numberInfo{
+    display: block;
+    width: 80%;
+    margin:auto;
+}
+
+.modal textarea{
+    margin: auto;
+    width: 100%;
+    padding: 5px;
+    border: 3px solid #ccc;
+    resize: vertical;
+}
+
+/*.modal input{
+    text-align: center;
+}*/
+
+#attachmentModalName{
+    margin-top: 0.5em;
+    display: block;
+    text-align: center;
+    font-size: 1.5em;
+}
+#attachmentInfo{
+    display: block;
+    width: 80%;
+    margin:auto;
+}
+
+#attachmentInfo input{
+    width:100%
+}
+
+.modal button{
+    float: right;
+    margin: 1px;
+}
+
+.modal header, footer{
+    height:5%;
+    width:100%;
+    background-color: green;
+    display: block;
+}
+
+.container{
+    display:none;
+    width: 80%;
+    margin: auto;
+
+}
+
+.container input{
+    margin-top: 2px;
+}
+
+.container h3{
+    display: block;
+    text-align:center;
+}
+
+#error, #error2, #warnsize, #abort{
+    display:none;
+}
+
+/*Index.jsp search form*/
+#searchModalName{
+    margin-top: 0.5em;
+    display: block;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+#searchFields input[type=text] {
+    display: inline-block;
+    width: 100%;
+    padding: 10px 5px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 3px solid #ccc;
+    transition: 0.5s;
+    transition: 0.5s;
+    outline: none;
+}
+#searchFields input[type=text]:focus {
+    border: 3px solid #555;
+}
+#searchFields select{
+    padding: 9px 5px;
+    margin: 8px 10px;
+}
+
+#search{
+    display:block;
+    width: 80%;
+    margin: auto;
+
+}
+.birth {
+    display: inline-block;
+    width: 23%;
+    padding: 10px 5px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 3px solid #ccc;
+    transition: 0.5s;
+    outline: none;
+}
+.birth:focus {
+    border: 3px solid #555;
+}
+
+#profileImg:hover{
+    cursor: pointer;
+    outline: 1px solid orange;
+}
+#mdlImg{
+    outline: 2px solid orange;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 4%;
+    margin-bottom: 3px;
+    display: block;
+    max-width:90%;
+
+}
+#mdlImg .modal-content{
+}
+#imgModal button{
+    padding:5px;
+    width: 32%
+
+}
+#buttons{
+    display: block;
+    display: block;
+    max-width: 70%;
+    margin-left:auto;
+    margin-right: auto;
+    overflow: auto;
+}
+
+#emailForm textarea{
+    min-height: 20%;
+    border-radius: 10px;
+}
+
+#mailBoxList{
+    min-height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+#mailBoxList div{
+    background-color: #669999;
+    border-radius: 6px;
+    padding: 3px;
+    margin-left: 2px;
+    margin-top: 2px;
+    color: white;
+    font-size: 0.9em;
+}
+
+#emailForm input{
+    border-radius: 10px;
+    width: 100%;
+}
+#emailForm .modal-content{
+    border-radius: 15px;
+    font-size: 1.2em;
+}
+
+#emailForm form{
+    margin-bottom: 25px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.loader {
+    border: 16px solid #f6f6f6;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    margin: 30% auto;
+    opacity: 1;
+}
+.loaderBack {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: white;
+    opacity: 0.9;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
