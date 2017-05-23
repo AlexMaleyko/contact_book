@@ -19,6 +19,8 @@
 !*.properties
 !index.jsp
 !contactForm.jsp
+!error404.html
+!general-error.jsp
 !*.css
 !*.js
 !*.stg
