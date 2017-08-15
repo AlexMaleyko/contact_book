@@ -1,4 +1,4 @@
-package com.itechart.maleiko.contact_book.business.DAO;
+package com.itechart.maleiko.contact_book.business.dao;
 
 import com.itechart.maleiko.contact_book.business.entity.Contact;
 import com.itechart.maleiko.contact_book.business.model.ContactDTO;

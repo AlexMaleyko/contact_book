@@ -1,349 +1,278 @@
 package com.itechart.maleiko.contact_book.business.service;
 
-import com.itechart.maleiko.contact_book.business.DAO.*;
+import com.itechart.maleiko.contact_book.business.dao.*;
+import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
 import com.itechart.maleiko.contact_book.business.entity.Attachment;
 import com.itechart.maleiko.contact_book.business.entity.Contact;
+import com.itechart.maleiko.contact_book.business.entity.Image;
 import com.itechart.maleiko.contact_book.business.entity.PhoneNumber;
-import com.itechart.maleiko.contact_book.business.model.AttachmentDTO;
 import com.itechart.maleiko.contact_book.business.model.ContactDTO;
-import com.itechart.maleiko.contact_book.business.model.PhoneNumberDTO;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.itechart.maleiko.contact_book.business.service.exceptions.ServiceException;
+import com.itechart.maleiko.contact_book.business.utils.ConnectionController;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-
+import java.util.stream.Collectors;
 
 public class ContactController {
 
-    private static final org.slf4j.Logger LOGGER=
+    private static final org.slf4j.Logger LOGGER =
             org.slf4j.LoggerFactory.getLogger(ContactController.class);
 
-    private Properties properties;
-    private String propFileName = "fileStorage.properties";
+    private ContactDAO contactDAO;
+    private AttachmentDAO attachmentDAO;
+    private PhoneNumberDAO phoneNumberDAO;
+    private ModelEntityConverter modelEntityConverter;
+    private EntityModelConverter entityModelConverter;
+    private ConnectionController connectionController;
 
-    public List<ContactDTO> getAllContactDTO(Connection conn, int skip, int limit) {
+    public ContactController() {
+        DAOFactoryProducer factoryProducer = DAOFactoryProducer.getInstance();
+        DAOFactory daoFactory = factoryProducer.createDAOFactory();
+        this.contactDAO = daoFactory.createContactDAO();
+        this.attachmentDAO = daoFactory.createAttachmentDAO();
+        this.phoneNumberDAO = daoFactory.createPhoneNumberDAO();
+        this.modelEntityConverter = new ModelEntityConverter();
+        this.entityModelConverter = new EntityModelConverter();
+        this.connectionController = ConnectionController.getInstance();
+    }
 
+    public List<ContactDTO> getAllContactDTO(int skip, int limit) throws DAOException{
         LOGGER.info("method: getAllContactDTO()");
 
         List<ContactDTO> contactDTOList = new ArrayList<>();
-        List<Contact> contactList = null;
+        List<Contact> contactList;
+        Connection connection = null;
         try {
-            contactList = (new ContactDAOImpl()).getAll(conn, skip, limit);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            connection = connectionController.provideConnection();
+            contactDAO.setConnection(connection);
+            contactList = contactDAO.getAll(skip, limit);
+            for (Contact contact : contactList)
+                contactDTOList.add(entityModelConverter.convertEntityToModel(contact));
+        }finally {
+            connectionController.closeConnection(connection);
         }
-        EntityModelConverter converter = new EntityModelConverter();
-        for (Contact contact : contactList)
-            contactDTOList.add(converter.convertEntityToModel(conn, contact));
         return contactDTOList;
     }
 
-    public int getNumberOfContacts(Connection conn){
-        LOGGER.info("method: getNumberOfContactPages({})", conn);
-        int numberOfContacts = 0;
+    public int getNumberOfContacts() throws DAOException{
+        LOGGER.info("method: getNumberOfContactPages()");
+        int numberOfContacts;
+        Connection connection = null;
         try {
-            numberOfContacts = (new ContactDAOImpl()).getNumberOfContacts(conn);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            connection = connectionController.provideConnection();
+            contactDAO.setConnection(connection);
+            numberOfContacts = contactDAO.getNumberOfContacts();
+        }finally {
+            connectionController.closeConnection(connection);
         }
         return numberOfContacts;
     }
 
-    public PairResultSize findContactDTOs(Connection conn, Map<String, Object> fieldValue) {
+    public PairResultSize findContactDTOs(Map<String, Object> fieldValue) throws DAOException{
+        LOGGER.info("method: findContactDTOs({})", fieldValue.getClass().getSimpleName());
 
-        LOGGER.info("method: findContactDTOs({}, {})", conn, fieldValue.getClass().getSimpleName());
-        LOGGER.info("{}, {}", fieldValue.toString(), fieldValue.get("fname"));
-        ContactDAO contactDAO = new ContactDAOImpl();
         PairResultSize newPair = new PairResultSize();
-        PairResultSize receivedPair = null;
+        PairResultSize receivedPair;
         List<ContactDTO> contactDTOList = new ArrayList<>();
-        List<Contact> contactList = null;
-        long resultSize = 0;
+        List<Contact> contactList;
+        Connection connection = null;
         try {
-            receivedPair = contactDAO.findByGivenParameters(conn, fieldValue);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            connection = connectionController.provideConnection();
+            contactDAO.setConnection(connection);
+            receivedPair = contactDAO.findByGivenParameters(fieldValue);
+            contactList = receivedPair.getContactList();
+            for (Contact contact : contactList) {
+                contactDTOList.add(entityModelConverter.convertEntityToModel(contact));
+            }
+            newPair.setContactDTOList(contactDTOList);
+            newPair.setResultSetSize(receivedPair.getResultSetSize());
+        }finally {
+            connectionController.closeConnection(connection);
         }
-        contactList = receivedPair.getContactList();
-        EntityModelConverter converter = new EntityModelConverter();
-        for (Contact contact : contactList) {
-            contactDTOList.add(converter.convertEntityToModel(conn, contact));
-        }
-        newPair.setContactDTOList(contactDTOList);
-        newPair.setResultSetSize(receivedPair.getResultSetSize());
         return newPair;
     }
 
+    public ContactDTO getContactDTOById(long id) throws DAOException{
+        LOGGER.info("method: getContactDTOById({})", id);
 
-    public ContactDTO getContactDTOById(Connection conn, long id){
-
-        LOGGER.info("method: getContactDTOById({}, {})", conn, id);
-
-        ContactDAO contactDAO = new ContactDAOImpl();
-
-        ContactDTO contactDTO = null;
-
+        ContactDTO contactDTO;
+        Connection connection = null;
         try {
-            contactDTO = (new EntityModelConverter()).convertEntityToModel(conn, contactDAO.findById(conn, id));
-            properties = new Properties();
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-            properties.load(inputStream);
-
-            if (StringUtils.isNotBlank(contactDTO.getProfilePictureName())) {
-                Path source = Paths.get(contactDTO.getProfilePictureName());
-                Path destination = Paths.get(properties.getProperty("profileImageServerFolder"));
-                if (Files.exists(destination.toAbsolutePath())) {
-                    FileUtils.cleanDirectory(destination.toAbsolutePath().toFile());
-                }
-                FileUtils.copyFileToDirectory(source.toFile(), destination.toAbsolutePath().toFile());
-                FileUtils.forceDeleteOnExit(destination.toAbsolutePath().toFile());
-                contactDTO.setProfilePictureName(properties.getProperty("imageRelativePath") + source.getFileName());
-            } else {
-                    contactDTO.setProfilePictureName(properties.getProperty("defaultPicturePath"));
-            }
-            List<AttachmentDTO> attachmentDTOList = contactDTO.getAttachmentDTOList();
-            Path destination = Paths.get(properties.getProperty("contactFilesServerFolder"));
-            if (!contactDTO.getAttachmentDTOList().isEmpty()) {
-                if (Files.exists(destination.toAbsolutePath())) {
-                    FileUtils.cleanDirectory(destination.toAbsolutePath().toFile());
-                }
-                for (AttachmentDTO attachmentDTO : attachmentDTOList) {
-                    if (StringUtils.isNotBlank(attachmentDTO.getFilePath())) {
-                        Path source = Paths.get(attachmentDTO.getFilePath());
-                        FileUtils.copyFileToDirectory(source.toFile(), destination.toAbsolutePath().toFile());
-                        FileUtils.forceDeleteOnExit(destination.toAbsolutePath().toFile());
-                        attachmentDTO.setFilePath(properties.getProperty("fileRelativePath") + source.getFileName());
-                    }
-                }
-            }
-        }catch (IOException e) {
-                LOGGER.error(e.getMessage());
-            }catch (SQLException e) {
-            LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
-                    e.getSQLState(), e.getErrorCode(), e.getMessage());
+            connection = connectionController.provideConnection();
+            contactDAO.setConnection(connection);
+            contactDTO = entityModelConverter.convertEntityToModel(contactDAO.findById(id));
         }
-
+        finally {
+            connectionController.closeConnection(connection);
+        }
         return contactDTO;
     }
 
-    public List<ContactDTO> getContactDTOsByIdList(Connection conn, List<Long> ids){
-
-        LOGGER.info("method: getContactDTOsByIdList({}, {})", conn, ids.getClass().getSimpleName());
+    public List<ContactDTO> getContactDTOsByIdList(List<Long> ids) throws DAOException{
+        LOGGER.info("method: getContactDTOsByIdList({})", ids.getClass().getSimpleName());
 
         List<ContactDTO> contactDTOList = new ArrayList<>();
         List<Contact> contactList = new ArrayList<>();
+        Connection connection = null;
         try {
-            ContactDAOImpl contactDAO = new ContactDAOImpl();
-            for(long id: ids) {
-                contactList.add(contactDAO.findById(conn, id));
+            connection = connectionController.provideConnection();
+            contactDAO.setConnection(connection);
+            for (long id : ids) {
+                contactList.add(contactDAO.findById(id));
             }
-            } catch (SQLException e) {
-            LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
-                    e.getSQLState(), e.getErrorCode(), e.getMessage());
-        }
-
-        EntityModelConverter converter = new EntityModelConverter();
-
-        for(Contact contact : contactList){
-            contactDTOList.add(converter.convertEntityToModel(conn, contact));
+            for (Contact contact : contactList) {
+                contactDTOList.add(entityModelConverter.convertEntityToModel(contact));
+            }
+        }finally {
+            connectionController.closeConnection(connection);
         }
         return contactDTOList;
     }
 
-    public void updateContact(Connection conn, ContactDTO contactDTO){
-        LOGGER.info("method: updateContact({}, {})", conn, contactDTO);
+    public void updateContact(ContactDTO contactDTO) throws DAOException, ServiceException{
 
+        Connection connection = null;
         try {
-            ContactDAO contactDAO = new ContactDAOImpl();
-            PhoneNumberDAO numberDAO = new PhoneNumberDAOImpl();
-            AttachmentDAO attachmentDAO = new AttachmentDAOImpl();
-            ModelEntityConverter converter = new ModelEntityConverter();
+            connection = connectionController.provideConnection();
+            connection.setAutoCommit(false);
+            contactDAO.setConnection(connection);
+            attachmentDAO.setConnection(connection);
+            phoneNumberDAO.setConnection(connection);
+            Contact contact = modelEntityConverter.convertModelToEntity(contactDTO);
+            contactDAO.update(contact);
 
-            conn.setAutoCommit(false);
-
-            Contact contact=converter.convertModelToEntity(contactDTO);
-            contactDAO.update(conn, contact);
-
-            List<PhoneNumberDTO> numberDTOList = contactDTO.getNumberDTOList();
-            if(!numberDTOList.isEmpty()){
-                for(PhoneNumberDTO numberDTO : numberDTOList){
-                    if(numberDTO.getNumberId() != 0){
-                        PhoneNumber number = converter.convertModelToEntity(numberDTO, contactDTO.getContactId());
-                        numberDAO.update(conn, number);
+            //save and update numbers
+            if (!contact.getPhoneNumbers().isEmpty()) {
+                List<PhoneNumber> numbersForSave = new ArrayList<>();
+                List<PhoneNumber> numbersForUpdate = new ArrayList<>();
+                for (PhoneNumber number : contact.getPhoneNumbers()) {
+                    if (number.getNumberId() != 0) {
+                        numbersForUpdate.add(number);
+                    } else {
+                        numbersForSave.add(number);
                     }
-                    else{
-                        PhoneNumber number = converter.convertModelToEntity(numberDTO, contactDTO.getContactId());
-                        numberDAO.save(conn, number);
+                }
+                if (!numbersForUpdate.isEmpty()) {
+                    phoneNumberDAO.update(numbersForUpdate);
+                }
+                if (!numbersForSave.isEmpty()) {
+                    phoneNumberDAO.save(numbersForSave);
+                }
+            }
+            //save and update attachments
+            if (!contact.getAttachments().isEmpty()) {
+                List<Attachment> attachmentsForUpdate = new ArrayList<>();
+                List<Attachment> attachmentsForSave = new ArrayList<>();
+                for (Attachment attachment : contact.getAttachments()) {
+                    if (attachment.getAttachmentId() != 0) {
+                        attachmentsForUpdate.add(attachment);
+                    } else {
+                        attachmentsForSave.add(attachment);
                     }
+                }
+                if(!attachmentsForUpdate.isEmpty()) {
+                    attachmentDAO.update(attachmentsForUpdate);
+                }
+                if(!attachmentsForSave.isEmpty()) {
+                    attachmentDAO.save(attachmentsForSave);
                 }
             }
 
-            List<AttachmentDTO> attachmentDTOList = contactDTO.getAttachmentDTOList();
-            if(!attachmentDTOList.isEmpty()){
-                for(AttachmentDTO attachmentDTO : attachmentDTOList){
-                    if(attachmentDTO.getAttachmentId() != 0){
-                        Attachment attachment =
-                                converter.convertModelToEntity(attachmentDTO, contactDTO.getContactId());
-                        attachmentDAO.update(conn, attachment);
-                    }
-                    else{
-                        Attachment attachment =
-                                converter.convertModelToEntity(attachmentDTO, contactDTO.getContactId());
-                        attachmentDAO.save(conn, attachment);
-                    }
-                }
-            }
-
+            //delete numbers
             List<Long> phoneNumberDeleteList = contactDTO.getPhoneNumberDeleteList();
-            if(!phoneNumberDeleteList.isEmpty()){
-                for(long id : phoneNumberDeleteList){
-                    if(id != 0){
-                        numberDAO.deleteById(conn, id);
-                    }
-                }
+            if (!phoneNumberDeleteList.isEmpty()) {
+                phoneNumberDAO.deleteById(phoneNumberDeleteList);
             }
 
-            List<Long> attachDeleteList = contactDTO.getAttachDeleteList();
-            if(!attachDeleteList.isEmpty()){
-                for(long id : attachDeleteList){
-                    if (id != 0) {
-                        attachmentDAO.deleteById(conn, id);
-                    }
-                }
+            //delete attachments
+            List<Long> attachDeleteList =
+                    contactDTO.getAttachDeleteList().stream().filter(id -> id != 0).collect(Collectors.toList());
+            if (!attachDeleteList.isEmpty()) {
+                attachmentDAO.deleteByIds(attachDeleteList);
             }
-            conn.commit();
+
+            connection.commit();
         } catch (SQLException e) {
-            LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
-                    e.getSQLState(), e.getErrorCode(), e.getMessage());
-            try {
-                LOGGER.error("Transaction is being rolled back");
-                conn.rollback();
-            } catch (SQLException e1) {
-                LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
-                        e.getSQLState(), e.getErrorCode(), e.getMessage());
-            }
-            throw new RuntimeException("File upload failed. Contact info wasn't saved");
-        } catch (Exception e) {
-            LOGGER.error("{} {}", e.getClass(), e.getMessage());
-            try {
-                LOGGER.error("Transaction is being rolled back");
-                conn.rollback();
-            } catch (SQLException e1) {
-                LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
-                        e1.getSQLState(), e1.getErrorCode(), e1.getMessage());
-            }
-            throw new RuntimeException("File upload failed. Contact info wasn't saved");
+            String message = "SQLState: " + e.getSQLState() + " ErrorCode: " + e.getErrorCode() +
+                    "Message: {}" + e.getMessage();
+            connectionController.rollback(connection);
+            throw new ServiceException(message, e);
+        } catch (DAOException e) {
+            connectionController.rollback(connection);
+            throw e;
+        }finally {
+            connectionController.closeConnection(connection);
         }
     }
 
-    public void deleteContactsById(Connection conn, List<Long> ids) {
+    public void deleteContactsByIds(List<Long> ids) throws ServiceException, DAOException{
+        LOGGER.info("method: deleteContactsByIds({})", ids);
 
-        LOGGER.info("method: deleteContactsById( {}, List.size() = {})", conn, ids.size());
-
+        Connection connection = null;
         try {
-            conn.setAutoCommit(false);
-
-            PhoneNumberDAOImpl phoneNumberDAO = new PhoneNumberDAOImpl();
-            AttachmentDAOImpl attachmentDAO = new AttachmentDAOImpl();
-            ContactDAOImpl contactDAO = new ContactDAOImpl();
-
-            for (long id : ids) {
-                phoneNumberDAO.deleteByContactId(conn, id);
-                attachmentDAO.deleteByContactId(conn, id);
-                contactDAO.deleteByContactId(conn, id);
-            }
-
-            conn.commit();
+            connection = connectionController.provideConnection();
+            connection.setAutoCommit(false);
+            contactDAO.setConnection(connection);
+            contactDAO.deleteByContactIds(ids);
+            connection.commit();
         } catch (SQLException e) {
-            LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
-                    e.getSQLState(), e.getErrorCode(), e.getMessage());
-                try {
-                    LOGGER.error("Transaction is being rolled back");
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
-                            e.getSQLState(), e.getErrorCode(), e.getMessage());
-                }
-        } catch (IOException e){
-            LOGGER.error("file deletion failed. Message: {}", e.getMessage());
+            String message = "SQLState: " + e.getSQLState() + " ErrorCode: " + e.getErrorCode() +
+                    "Message: {}" + e.getMessage();
+            connectionController.rollback(connection);
+            throw new ServiceException(message, e);
+        }finally {
+            connectionController.closeConnection(connection);
         }
     }
 
-    public void saveContact(Connection conn, ContactDTO contactDTO){
+    public void saveContact(ContactDTO contactDTO) throws ServiceException, DAOException{
+        LOGGER.info("method: saveContact({}, {})", contactDTO.getClass().getSimpleName());
 
-        LOGGER.info("method: saveContact({}, {})", conn, contactDTO.getClass().getSimpleName());
-        ModelEntityConverter converter = new ModelEntityConverter();
-        Contact contact= converter.convertModelToEntity(contactDTO);
-        ContactDAO contactDAO = new ContactDAOImpl();
-
+        Contact contact = modelEntityConverter.convertModelToEntity(contactDTO);
+        Connection connection = null;
         try {
-            conn.setAutoCommit(false);
-            PhoneNumberDAO numberDAO = new PhoneNumberDAOImpl();
-            AttachmentDAO attachmentDAO = new AttachmentDAOImpl();
+            connection = connectionController.provideConnection();
+            connection.setAutoCommit(false);
+            contactDAO.setConnection(connection);
+            contactDAO.save(contact);
 
-            contactDAO.save(conn, contact);
-
-            long contactId = contactDAO.getMaxContactId(conn);
-            List<PhoneNumberDTO> numberDTOList = contactDTO.getNumberDTOList();
-            if(!numberDTOList.isEmpty()){
-                for(PhoneNumberDTO numberDTO: numberDTOList){
-                    PhoneNumber number = converter.convertModelToEntity(numberDTO, contactId);
-                    numberDAO.save(conn, number);
-                }
-            }
-
-            List<AttachmentDTO> attachmentDTOList = contactDTO.getAttachmentDTOList();
-            if(!attachmentDTOList.isEmpty()){
-                for(AttachmentDTO attachmentDTO: attachmentDTOList){
-                    Attachment attachment = converter.convertModelToEntity(attachmentDTO, contactId);
-                    attachmentDAO.save(conn, attachment);
-                }
-            }
-            conn.commit();
+            connection.commit();
         } catch (SQLException e) {
-            LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
-                    e.getSQLState(), e.getErrorCode(), e.getMessage());
-            try {
-                properties = new Properties();
-                InputStream inputStream = ContactController.class.getClassLoader().getResourceAsStream(propFileName);
-                properties.load(inputStream);
+            String message = "SQLState: " + e.getSQLState() + " ErrorCode: " + e.getErrorCode() +
+                    "Message: {}" + e.getMessage();
+            connectionController.rollback(connection);
+            throw new ServiceException(message, e);
+        } catch (DAOException e) {
+            connectionController.rollback(connection);
+            throw e;
+        }finally {
+            connectionController.closeConnection(connection);
+        }
+    }
 
-                LOGGER.error("Transaction is being rolled back");
-                conn.rollback();
-                Path deletePath = Paths.get(properties.getProperty("profileImageContainer")
-                        + contactDAO.getLastContactId(conn));
-                FileUtils.deleteQuietly(new File(deletePath.toAbsolutePath().toString()));
-                deletePath = Paths.get(properties.getProperty("contactFilesContainer")
-                        + contactDAO.getLastContactId(conn));
-                FileUtils.deleteQuietly(new File(deletePath.toAbsolutePath().toString()));
-            } catch (SQLException e1) {
-                LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
-                        e.getSQLState(), e.getErrorCode(), e.getMessage());
-            } catch (IOException e1) {
-                LOGGER.error(e1.getMessage());
-            }
-            throw new RuntimeException("File upload failed. Contact info wasn't saved");
-        } catch (Exception e) {
-            LOGGER.error("{} {}", e.getClass(), e.getMessage());
-            try {
-                LOGGER.error("Transaction is being rolled back");
-                conn.rollback();
-            } catch (SQLException e1) {
-                LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
-                        e1.getSQLState(), e1.getErrorCode(), e1.getMessage());
-            }
-            throw new RuntimeException("File upload failed. Contact info wasn't saved");
+    public Image getProfileImageByContactId(long id) throws DAOException{
+        Connection connection = null;
+        try{
+            connection = connectionController.provideConnection();
+            contactDAO.setConnection(connection);
+            return contactDAO.getProfileImageByContactId(id);
+        }finally{
+            connectionController.closeConnection(connection);
+        }
+    }
+
+    public Attachment getAttachmentById(long id) throws DAOException{
+        Connection connection = null;
+        try{
+            connection = connectionController.provideConnection();
+            attachmentDAO.setConnection(connection);
+            return attachmentDAO.getFile(id);
+        }finally{
+            connectionController.closeConnection(connection);
         }
     }
 }

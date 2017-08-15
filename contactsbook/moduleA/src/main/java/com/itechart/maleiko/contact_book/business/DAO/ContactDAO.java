@@ -1,6 +1,8 @@
-package com.itechart.maleiko.contact_book.business.DAO;
+package com.itechart.maleiko.contact_book.business.dao;
 
+import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
 import com.itechart.maleiko.contact_book.business.entity.Contact;
+import com.itechart.maleiko.contact_book.business.entity.Image;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -8,27 +10,20 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Alexey on 15.03.2017.
- */
-public interface ContactDAO {
-    List<Contact> getAll(Connection conn, int skip, int limit) throws SQLException;
+public interface ContactDAO extends DAO{
+    List<Contact> getAll( int skip, int limit) throws DAOException;
 
-    Contact findById(Connection conn, long id) throws SQLException;
+    Contact findById(long id) throws DAOException;
 
-    void save(Connection conn, Contact contact) throws Exception;
+    void save(Contact contact) throws DAOException;
 
-    void delete(Connection conn, Contact contact) throws SQLException;
+    void update(Contact contact) throws DAOException;
 
-    void update(Connection conn, Contact contact) throws Exception;
+    void deleteByContactIds(List<Long> ids) throws DAOException;
 
-    void deleteByContactId(Connection conn, long id) throws SQLException, IOException;
+    PairResultSize findByGivenParameters(Map<String, Object> fieldValue) throws DAOException;
 
-    PairResultSize findByGivenParameters(Connection conn, Map<String, Object> fieldValue) throws SQLException;
+    int getNumberOfContacts() throws DAOException;
 
-    long getMaxContactId(Connection conn) throws SQLException;
-
-    long getLastContactId(Connection conn) throws SQLException;
-
-    int getNumberOfContacts(Connection conn) throws SQLException;
+    Image getProfileImageByContactId(long id) throws DAOException;
 }

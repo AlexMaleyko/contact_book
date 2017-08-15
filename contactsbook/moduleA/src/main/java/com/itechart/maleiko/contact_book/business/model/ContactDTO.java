@@ -24,7 +24,7 @@ public class ContactDTO {
     private String city;
     private String street;
     private String postalCode;
-    private String profilePictureName;
+    private String profilePicturePath;
     private FileItem profileImage;
     private List<PhoneNumberDTO> numberDTOList;
     private List<AttachmentDTO> attachmentDTOList;
@@ -167,12 +167,12 @@ public class ContactDTO {
         this.postalCode = postalCode;
     }
 
-    public String getProfilePictureName() {
-        return profilePictureName;
+    public String getProfilePicturePath() {
+        return profilePicturePath;
     }
 
-    public void setProfilePictureName(String profilePictureName) {
-        this.profilePictureName = profilePictureName;
+    public void setProfilePicturePath(String profilePicturePath) {
+        this.profilePicturePath = profilePicturePath;
     }
 
     public FileItem getProfileImage() {

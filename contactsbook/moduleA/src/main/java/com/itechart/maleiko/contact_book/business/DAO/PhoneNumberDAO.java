@@ -1,5 +1,6 @@
-package com.itechart.maleiko.contact_book.business.DAO;
+package com.itechart.maleiko.contact_book.business.dao;
 
+import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
 import com.itechart.maleiko.contact_book.business.entity.PhoneNumber;
 
 import java.sql.Connection;
@@ -9,18 +10,14 @@ import java.util.List;
 /**
  * Created by Alexey on 15.03.2017.
  */
-public interface PhoneNumberDAO {
-    void save(Connection conn, PhoneNumber phoneNumber) throws SQLException;
+public interface PhoneNumberDAO extends DAO{
+    void save(List<PhoneNumber> phoneNumber) throws DAOException;
 
-    List<PhoneNumber> findByContactId(Connection conn, long contact_id) throws SQLException;
+    void update(List<PhoneNumber> phoneNumber) throws DAOException;
 
-    List<PhoneNumber> getAll (Connection conn) throws SQLException;
+    List<PhoneNumber> findByContactId(long contact_id) throws DAOException;
 
-    void update(Connection conn,PhoneNumber phoneNumber) throws SQLException;
+    void deleteByContactId(long id) throws DAOException;
 
-    void delete(Connection conn,PhoneNumber phoneNumber) throws SQLException;
-
-    void deleteByContactId(Connection conn, long id) throws SQLException;
-
-    void deleteById(Connection conn, long id) throws  SQLException;
+    void deleteById(List<Long> ids) throws DAOException;
 }

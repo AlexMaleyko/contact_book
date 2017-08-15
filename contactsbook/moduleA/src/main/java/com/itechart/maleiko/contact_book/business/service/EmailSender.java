@@ -1,6 +1,8 @@
 package com.itechart.maleiko.contact_book.business.service;
 
+import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
 import com.itechart.maleiko.contact_book.business.model.ContactDTO;
+import com.itechart.maleiko.contact_book.business.service.exceptions.ServiceException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.mail.*;
@@ -20,7 +22,7 @@ public class EmailSender {
     private static final org.slf4j.Logger LOGGER=
             org.slf4j.LoggerFactory.getLogger(ContactController.class);
 
-    public void sendEmail(Connection conn, List<Long> recipientIds, String subject, String text){
+    public void sendEmail(List<Long> recipientIds, String subject, String text) throws DAOException{
         ContactController controller = new ContactController();
         Properties properties = new Properties();
         String propFileName = "email.properties";
@@ -46,7 +48,7 @@ public class EmailSender {
                                 properties.getProperty("password"));
                     }
                 });
-        List<ContactDTO> contactDTOList = controller.getContactDTOsByIdList(conn, recipientIds);
+        List<ContactDTO> contactDTOList = controller.getContactDTOsByIdList(recipientIds);
         if(contactDTOList.isEmpty()){
             LOGGER.error("recipient list is empty");
             throw new RuntimeException("You didn't choose any recipient");

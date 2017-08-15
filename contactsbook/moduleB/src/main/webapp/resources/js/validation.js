@@ -17,11 +17,11 @@ function searchFormValidator() {
     //second, do validation logic
     var filled = 0;
     for (var i = 0; i < inputs.length; i++) {
-        if (inputs[i].value.replace(/\s/g, "").length > 0) {
+        if (inputs[i].value.replace(/\s/g, "").length > 0 && inputs[i].name !== "isSameSearch") {
             filled++;
         }
     }
-    if (filled === 0 && document.getElementById('gender').value === '') {
+    if (filled === 0) {
         generalMsg.innerHTML="Заполните по крайней мере одно поле";
         return false;
     }

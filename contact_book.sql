@@ -71,7 +71,7 @@ CREATE TABLE `contact` (
   `deletion_date` timestamp NULL DEFAULT NULL,
   `profile_picture` varchar(260) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`contact_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=215 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
