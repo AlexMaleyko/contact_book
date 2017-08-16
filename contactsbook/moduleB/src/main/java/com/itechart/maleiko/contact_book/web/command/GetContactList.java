@@ -2,10 +2,11 @@ package com.itechart.maleiko.contact_book.web.command;
 
 import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
 import com.itechart.maleiko.contact_book.business.model.ContactDTO;
-import com.itechart.maleiko.contact_book.business.service.exceptions.ServiceException;
 import org.apache.commons.lang3.StringUtils;
 import com.itechart.maleiko.contact_book.business.service.ContactController;
 import com.itechart.maleiko.contact_book.business.service.TemplateMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -18,15 +19,13 @@ import java.util.List;
 public class GetContactList implements Command {
     private ContactController controller;
 
-    public GetContactList(){
+    GetContactList(){
         controller = new ContactController();
     }
 
-    private static final org.slf4j.Logger LOGGER=
-            org.slf4j.LoggerFactory.getLogger(SaveContact.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GetContactList.class);
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOGGER.info("method: execute");
         controller= new ContactController();
         int currentPage = 0;
         int clickedPage = 0;
@@ -51,12 +50,12 @@ public class GetContactList implements Command {
             }
         }
 
-        int numberOfContacts = 0;
+        int numberOfContacts;
         try {
             numberOfContacts = controller.getNumberOfContacts();
         } catch (DAOException e) {
             LOGGER.error("{}", e.getMessage());
-            response.sendError(500);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
         int pageTotal = (numberOfContacts-skipTotal)/clientLimit + skipTotal/clientLimit;
@@ -72,12 +71,12 @@ public class GetContactList implements Command {
         request.setAttribute("clientLimit", clientLimit);
         request.setAttribute("pageTotal", pageTotal);
         request.setAttribute("msgTmpl", TemplateMessage.getAllTemplates());
-        List<ContactDTO> contacts = null;
+        List<ContactDTO> contacts;
         try {
             contacts = controller.getAllContactDTO(skipTotal, clientLimit);
         } catch (DAOException e) {
             LOGGER.error("{}", e.getMessage());
-            response.sendError(500);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
         request.setAttribute("paginationFormAction", "contacts");

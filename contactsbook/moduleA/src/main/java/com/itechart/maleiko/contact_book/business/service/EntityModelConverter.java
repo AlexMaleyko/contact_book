@@ -16,12 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class EntityModelConverter {
+class EntityModelConverter {
     private AttachmentDAO attachmentDAO;
     private PhoneNumberDAO phoneNumberDAO;
     private ConnectionController connectionController;
 
-    public EntityModelConverter(){
+    EntityModelConverter() {
         DAOFactoryProducer factoryProducer = DAOFactoryProducer.getInstance();
         DAOFactory daoFactory = factoryProducer.createDAOFactory();
         this.attachmentDAO = daoFactory.createAttachmentDAO();
@@ -32,11 +32,8 @@ public class EntityModelConverter {
     private static final org.slf4j.Logger LOGGER =
             org.slf4j.LoggerFactory.getLogger(EntityModelConverter.class);
 
-    public PhoneNumberDTO convertEntityToModel(PhoneNumber entity){
-
-        LOGGER.info("method: convertEntityToModel({})", entity.getClass().getSimpleName());
-
-        PhoneNumberDTO model=new PhoneNumberDTO();
+    private PhoneNumberDTO convertEntityToModel(PhoneNumber entity) {
+        PhoneNumberDTO model = new PhoneNumberDTO();
         model.setNumberId(entity.getNumberId());
         model.setCountryCode(entity.getCountryCode());
         model.setOperatorCode(entity.getOperatorCode());
@@ -46,11 +43,8 @@ public class EntityModelConverter {
         return model;
     }
 
-    public AttachmentDTO convertEntityToModel(Attachment entity){
-
-        LOGGER.info("method: convertEntityToModel({})",entity.getClass().getSimpleName());
-
-        AttachmentDTO model=new AttachmentDTO();
+    private AttachmentDTO convertEntityToModel(Attachment entity) {
+        AttachmentDTO model = new AttachmentDTO();
         model.setAttachmentId(entity.getAttachmentId());
         model.setFilePath(entity.getFilePath());
         model.setFileName(entity.getFileName());
@@ -59,19 +53,15 @@ public class EntityModelConverter {
         return model;
     }
 
-    public ContactDTO convertEntityToModel(Contact entity) throws DAOException{
-
-        LOGGER.info("method: convertEntityToModel({})", entity.getClass().getSimpleName());
-
-        ContactDTO model=new ContactDTO();
+    ContactDTO convertEntityToModel(Contact entity) throws DAOException {
+        ContactDTO model = new ContactDTO();
         model.setContactId(entity.getContactId());
         model.setName(entity.getName());
         model.setSurname(entity.getSurname());
         model.setPatronymic(entity.getPatronymic());
-        if(entity.getBirth() != null){
+        if (entity.getBirth() != null) {
             model.setBirth(new org.joda.time.LocalDate(entity.getBirth().getTime()));
-        }
-        else{
+        } else {
             model.setBirth(null);
         }
         model.setGender(entity.getGender());
@@ -86,7 +76,7 @@ public class EntityModelConverter {
         model.setPostalCode(entity.getPostalCode());
         model.setProfilePicturePath(entity.getProfilePicturePath());
         /*Setting phoneNumberDTOList*/
-        List<PhoneNumberDTO> numberDTOList=new ArrayList<>();
+        List<PhoneNumberDTO> numberDTOList = new ArrayList<>();
         List<PhoneNumber> numberEntityList;
 
         Connection connection = null;
@@ -94,20 +84,20 @@ public class EntityModelConverter {
             connection = connectionController.provideConnection();
             phoneNumberDAO.setConnection(connection);
             attachmentDAO.setConnection(connection);
-            numberEntityList= phoneNumberDAO.findByContactId(entity.getContactId());
-            for(PhoneNumber number:numberEntityList) {
+            numberEntityList = phoneNumberDAO.findByContactId(entity.getContactId());
+            for (PhoneNumber number : numberEntityList) {
                 numberDTOList.add(convertEntityToModel(number));
             }
             model.setNumberDTOList(numberDTOList);
         /*Setting attachmentDTOList*/
-            List<AttachmentDTO> attachmentDTOList=new ArrayList<>();
+            List<AttachmentDTO> attachmentDTOList = new ArrayList<>();
             List<Attachment> attachmentEntityList;
-            attachmentEntityList=attachmentDAO.findByContactId(entity.getContactId());
-            for(Attachment attachment: attachmentEntityList) {
+            attachmentEntityList = attachmentDAO.findByContactId(entity.getContactId());
+            for (Attachment attachment : attachmentEntityList) {
                 attachmentDTOList.add(convertEntityToModel(attachment));
             }
             model.setAttachmentDTOList(attachmentDTOList);
-        }finally {
+        } finally {
             connectionController.closeConnection(connection);
         }
         return model;

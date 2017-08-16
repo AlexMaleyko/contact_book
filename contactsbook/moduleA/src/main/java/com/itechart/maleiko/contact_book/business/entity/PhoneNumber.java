@@ -1,8 +1,5 @@
 package com.itechart.maleiko.contact_book.business.entity;
 
-/**
- * Created by Alexey on 15.03.2017.
- */
 public class PhoneNumber {
     private long numberId;
     private String countryCode;

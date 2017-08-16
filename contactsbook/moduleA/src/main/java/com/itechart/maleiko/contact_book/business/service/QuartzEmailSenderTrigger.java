@@ -5,9 +5,6 @@ import org.quartz.impl.StdSchedulerFactory;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
-/**
- * Created by Alexey on 10.04.2017.
- */
 public class QuartzEmailSenderTrigger {
     private static final org.slf4j.Logger LOGGER=
             org.slf4j.LoggerFactory.getLogger(QuartzEmailSenderTrigger.class);

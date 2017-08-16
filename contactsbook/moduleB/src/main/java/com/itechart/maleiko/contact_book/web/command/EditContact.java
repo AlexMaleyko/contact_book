@@ -5,6 +5,7 @@ import com.itechart.maleiko.contact_book.business.model.AttachmentDTO;
 import com.itechart.maleiko.contact_book.business.model.ContactDTO;
 import com.itechart.maleiko.contact_book.business.model.PhoneNumberDTO;
 import com.itechart.maleiko.contact_book.business.service.exceptions.ServiceException;
+import com.itechart.maleiko.contact_book.business.utils.PropertiesLoader;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -12,6 +13,8 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import com.itechart.maleiko.contact_book.business.service.ContactController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -24,31 +27,30 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-/**
- * Created by Alexey on 04.04.2017.
- */
 public class EditContact implements Command {
     private ContactController controller;
-    private Properties properties;
-    private String propFileName = "fileStorage.properties";
 
     public EditContact(){
         controller = new ContactController();
     }
 
-    private static final org.slf4j.Logger LOGGER=
-            org.slf4j.LoggerFactory.getLogger(SaveContact.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EditContact.class);
 
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOGGER.info("method: execute");
         if (!ServletFileUpload.isMultipartContent(request)) {
             LOGGER.error("Form doesn't have enctype = multipart/form-data.");
-            throw new RuntimeException("Error: Form must has enctype = multipart/form-data.");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,"Error: Form must has enctype = multipart/form-data.");
+            return;
         }
-        properties = new Properties();
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-        properties.load(inputStream);
+        Properties properties;
+        try{
+            properties = PropertiesLoader.load("fileStorage.properties");
+        }catch (DAOException e){
+            LOGGER.error("{}", e.getMessage());
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
 
         DiskFileItemFactory factory = new DiskFileItemFactory();
         factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
@@ -128,8 +130,9 @@ public class EditContact implements Command {
                         //Fill contactDTO fields
                         if(item.getFieldName().equals("contactId")){
                             if(!StringUtils.isNotBlank(item.getString("UTF-8"))){
-                                LOGGER.error("contactId is missing");
-                                throw new RuntimeException("Unable to update contact info. Operation aborted");
+                                LOGGER.error("Unable to update contact info. contactId is missing");
+                                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                                return;
                             }
                             contactDTO.setContactId(Long.parseLong(item.getString("UTF-8")));
                         }
@@ -213,35 +216,39 @@ public class EditContact implements Command {
                     number.setNumberId(Long.parseLong(phoneIds.get(i)));
                     if (countryCode.length() > 10) {
                         LOGGER.error("Country code exceeds maximum length. Saving aborted");
-                        throw new RuntimeException("Country code is too long");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                        return;
                     } else {
                         number.setCountryCode(countryCode);
                     }
                     if (operatorCode.length() > 10) {
                         LOGGER.error("Operator code exceeds maximum length. Saving aborted");
-                        throw new RuntimeException("Operator code is too long");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                        return;
                     } else {
                         number.setOperatorCode(operatorCode);
                     }
                     //check if number is empty string or contains not only digits or longer than 45 digits
                     if (phoneNumber.equals("") || !phoneNumber.matches("[0-9]+") || phoneNumber.length() > 45) {
                         LOGGER.error("Invalid phone number. Saving aborted.");
-                        throw new RuntimeException("You entered invalid phone number");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                        return;
                     } else {
                         number.setNumber(phoneNumber);
                     }
                     if (type.length() > 1) {
                         LOGGER.error("Number type exceeds maximum length. Saving aborted");
-                        throw new RuntimeException("Number type is too long");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                        return;
                     } else {
                         number.setType(type);
                     }
                     if (phoneComment.length() > 200) {
                         LOGGER.error("Phone comment size exceeds maximum length. Saving aborted");
-                        throw new RuntimeException("Phone comment is too long");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                        return;
                     } else {
                         number.setComment(phoneComment);
-                        LOGGER.info("number comment {}", phoneComment);
                     }
                     numberDTOList.add(number);
                 }
@@ -255,14 +262,16 @@ public class EditContact implements Command {
                 attachmentDTO.setAttachmentId(Long.parseLong(attachIds.get(i)));
                 if(attachName.length() > 100){
                     LOGGER.error("File name size exceeds maximum length. Saving aborted");
-                    throw new RuntimeException("File name is too long");
+                    response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+                    return;
                 }
                 else{
                     attachmentDTO.setFileName(attachName);
                 }
                 if(attachComment.length() > 200){
                     LOGGER.error("File comment size exceeds maximum length. Saving aborted");
-                    throw new RuntimeException("Phone comment is too long");
+                    response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+                    return;
                 }
                 else{
                     attachmentDTO.setComment(attachComment);
@@ -280,7 +289,7 @@ public class EditContact implements Command {
             controller.updateContact(contactDTO);
         }catch (FileUploadException | DAOException | ServiceException e) {
             LOGGER.error("{}", e.getMessage());
-            response.sendError(500);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
         response.sendRedirect("contacts");

@@ -10,6 +10,5 @@ public class UnknownCommand implements Command {
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.sendError(404);
-        return;
     }
 }

@@ -3,6 +3,7 @@ package com.itechart.maleiko.contact_book.business.dao.mysql;
 import com.itechart.maleiko.contact_book.business.dao.AttachmentDAO;
 import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
 import com.itechart.maleiko.contact_book.business.entity.Attachment;
+import com.itechart.maleiko.contact_book.business.utils.PropertiesLoader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,7 +22,6 @@ import java.util.Properties;
 
 public class AttachmentDAOImpl implements AttachmentDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(AttachmentDAOImpl.class);
-    private final String FILE_STORAGE_PROPERTIES_FILE_NAME;
     private final String SAVE_ATTACHMENT_QUERY;
     private final String FIND_ATTACHMENTS_BY_CONTACT_ID_QUERY;
     private final String FIND_ATTACHMENT_FILE_PATH_QUERY;
@@ -33,7 +32,6 @@ public class AttachmentDAOImpl implements AttachmentDAO {
     private Connection conn;
 
     {
-        FILE_STORAGE_PROPERTIES_FILE_NAME = "fileStorage.properties";
         SAVE_ATTACHMENT_QUERY = "INSERT INTO attachment (file_path, file_name, comment, contact_id) VALUES (?, ?, ?, ?)";
         FIND_ATTACHMENTS_BY_CONTACT_ID_QUERY = "SELECT attachment_id, file_path, file_name, upload_date, comment " +
                 "FROM attachment WHERE contact_id= ? AND deletion_date IS NULL";
@@ -50,8 +48,6 @@ public class AttachmentDAOImpl implements AttachmentDAO {
 
     @Override
     public void save(List<Attachment> attachments) throws DAOException{
-        LOGGER.info("method: save({})", attachments.getClass().getSimpleName());
-
         try (PreparedStatement stmt = conn.prepareStatement(SAVE_ATTACHMENT_QUERY)) {
             for (Attachment attachment : attachments) {
                 String fullPath = saveUploadedFileOnDisk(attachment);
@@ -65,7 +61,7 @@ public class AttachmentDAOImpl implements AttachmentDAO {
             stmt.executeBatch();
         }catch (SQLException e){
             String message = "Error saving attachment info. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
@@ -89,15 +85,8 @@ public class AttachmentDAOImpl implements AttachmentDAO {
 
     private String generateDestinationPathForStoringUploadedFile(String containingDirectoryName) throws DAOException {
         Path destination;
-        try {
-            Properties properties = new Properties();
-            InputStream inputStream = AttachmentDAO.class.getClassLoader()
-                    .getResourceAsStream(FILE_STORAGE_PROPERTIES_FILE_NAME);
-            properties.load(inputStream);
-            destination = Paths.get(properties.getProperty("contactFilesContainer")).resolve(containingDirectoryName);
-        }catch (IOException e){
-            throw new DAOException("Error accessing file storage properties", e);
-        }
+        Properties properties = PropertiesLoader.load("fileStorage.properties");
+        destination = Paths.get(properties.getProperty("contactFilesContainer")).resolve(containingDirectoryName);
         return destination.toString() + File.separator;
     }
 
@@ -113,7 +102,6 @@ public class AttachmentDAOImpl implements AttachmentDAO {
 
     @Override
     public void update(List<Attachment> attachments) throws DAOException {
-        LOGGER.info("method: update({})", attachments.getClass().getSimpleName());
         try (PreparedStatement stmt = conn.prepareStatement(UPDATE_ATTACHMENT_QUERY)) {
             for (Attachment attachment : attachments) {
                 stmt.setString(1, attachment.getFileName());
@@ -124,7 +112,7 @@ public class AttachmentDAOImpl implements AttachmentDAO {
             stmt.executeBatch();
         } catch (SQLException e){
             String message = "Error updating attachment info. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
@@ -132,7 +120,6 @@ public class AttachmentDAOImpl implements AttachmentDAO {
 
     @Override
     public List<Attachment> findByContactId(long contactId) throws DAOException{
-        LOGGER.info("method: findByContactId({})", contactId);
 
         List<Attachment> attachments = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(FIND_ATTACHMENTS_BY_CONTACT_ID_QUERY)) {
@@ -151,7 +138,7 @@ public class AttachmentDAOImpl implements AttachmentDAO {
             }
         }catch (SQLException e){
             String message = "Error finding attachment info. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
         deleteAttachmentsNotPresentInFileSystem(attachments);
@@ -172,7 +159,6 @@ public class AttachmentDAOImpl implements AttachmentDAO {
 
     @Override
     public void deleteByContactId(long id) throws DAOException{
-        LOGGER.info("method: deleteByContactId({})", id);
         deleteFilesFromFileSystemByContactId(id);
         deleteMetaInfoByContactId(id);
     }
@@ -184,7 +170,7 @@ public class AttachmentDAOImpl implements AttachmentDAO {
             performFilesDeletion(rs);
         }catch (SQLException e){
             String message = "Error finding attachment file path. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
@@ -195,14 +181,13 @@ public class AttachmentDAOImpl implements AttachmentDAO {
             deleteMetaInfo.executeUpdate();
         }catch (SQLException e){
             String message = "Error deleting attachment info. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
 
     @Override
     public void deleteByIds(List<Long> ids) throws DAOException {
-        LOGGER.info("method: delete({}, {})", conn, ids);
         deleteFilesFromFileSystemByAttachmentIds(ids);
         deleteMetaInfoByAttachmentIds(ids);
     }
@@ -215,7 +200,7 @@ public class AttachmentDAOImpl implements AttachmentDAO {
             performFilesDeletion(rs);
         }catch (SQLException e){
             String message = "Error finding attachment full path. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
@@ -285,7 +270,7 @@ public class AttachmentDAOImpl implements AttachmentDAO {
                     String fileSize = String.valueOf(Files.size(attachment));
                     return new Attachment(fileName, fileSize, bytes);
                 } else {
-                    throw new DAOException("Error loading file");
+                    throw new DAOException("File doesn't exists on path: " + attachmentPath);
                 }
             }
         } catch (SQLException e) {

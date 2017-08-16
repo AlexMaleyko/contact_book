@@ -42,8 +42,6 @@ public class PhoneNumberDAOImpl implements PhoneNumberDAO {
 
     @Override
     public void save(List<PhoneNumber> phoneNumbers) throws DAOException {
-        LOGGER.info("method: save({}, {})", conn, phoneNumbers.getClass().getSimpleName());
-
         try(PreparedStatement savePhoneNumber = conn.prepareStatement(SAVE_QUERY)){
             for(PhoneNumber number : phoneNumbers) {
                 savePhoneNumber.setString(1, number.getCountryCode());
@@ -57,16 +55,13 @@ public class PhoneNumberDAOImpl implements PhoneNumberDAO {
            savePhoneNumber.executeBatch();
         } catch (SQLException e){
             String message = "Error saving phone number. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
 
     @Override
     public void update(List<PhoneNumber> numbers) throws DAOException{
-
-        LOGGER.info("method: update({}, {})", conn, numbers.getClass().getSimpleName());
-
         try(PreparedStatement stmt=conn.prepareStatement(UPDATE_QUERY)){
             for(PhoneNumber number : numbers) {
                 stmt.setString(1, number.getCountryCode());
@@ -80,15 +75,13 @@ public class PhoneNumberDAOImpl implements PhoneNumberDAO {
             stmt.executeBatch();
         } catch (SQLException e){
             String message = "Error updating phone number. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
 
     @Override
     public List<PhoneNumber> findByContactId(long contactId) throws DAOException {
-        LOGGER.info("method: findByContactId({}, {})", conn, contactId);
-
         List<PhoneNumber> numbers=new ArrayList<>();
         try(PreparedStatement stmt=conn.prepareStatement(FIND_BY_CONTACT_ID_QUERY)){
             stmt.setLong(1,contactId);
@@ -99,7 +92,7 @@ public class PhoneNumberDAOImpl implements PhoneNumberDAO {
             }
         } catch (SQLException e){
             String message = "Error finding phone number by id. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
         return numbers;
@@ -118,9 +111,7 @@ public class PhoneNumberDAOImpl implements PhoneNumberDAO {
     }
 
     @Override
-    public void deleteById(List<Long> ids) throws DAOException{
-        LOGGER.info("method: deleteById({}, {})", conn, ids);
-
+    public void deleteByIds(List<Long> ids) throws DAOException{
         try(PreparedStatement stmt=conn.prepareStatement(DELETE_BY_ID_QUERY)){
             for(long id : ids) {
                 stmt.setLong(1, id);
@@ -129,21 +120,19 @@ public class PhoneNumberDAOImpl implements PhoneNumberDAO {
             stmt.executeBatch();
         }catch (SQLException e){
             String message = "Error deleting phone numbers by ids. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() +  " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
 
     @Override
     public void deleteByContactId(long id) throws DAOException{
-        LOGGER.info("method: deleteByContactId({}, {})", conn, id);
-
         try(PreparedStatement stmt=conn.prepareStatement(DELETE_BY_CONTACT_ID_QUERY)){
             stmt.setLong(1, id);
             stmt.executeUpdate();
         }catch (SQLException e){
             String message = "Error deleting phone number by contact id. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }

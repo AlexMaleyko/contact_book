@@ -2,7 +2,6 @@ package com.itechart.maleiko.contact_book.web.command;
 
 import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
 import com.itechart.maleiko.contact_book.business.entity.Attachment;
-import com.itechart.maleiko.contact_book.business.entity.Image;
 import com.itechart.maleiko.contact_book.business.service.ContactController;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -13,14 +12,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * Created by Alexey on 11.08.2017.
- */
 public class GetAttachment implements Command {
-    private final Logger LOGGER = LoggerFactory.getLogger(GetImage.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(GetAttachment.class);
     private ContactController contactController;
 
-    public GetAttachment(ContactController contactController) {
+    GetAttachment(ContactController contactController) {
         this.contactController = contactController;
     }
 
@@ -33,10 +29,12 @@ public class GetAttachment implements Command {
             attachment = contactController.getAttachmentById(Long.parseLong(attachmentId));
         } catch (DAOException e) {
             LOGGER.error("{}", e.getMessage());
-            response.sendError(HttpServletResponse.SC_CONFLICT);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }catch(Exception e){
-            LOGGER.error("Unable to parse attachmentId request parameter: {}", e.getMessage());
+            LOGGER.error("Unable to parse attachmentId request parameter {}", e.getMessage());
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Unable to parse attachmentId request parameter");
             return;
         }
         String contentType = request.getServletContext().getMimeType(attachment.getFileName());

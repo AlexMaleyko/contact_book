@@ -5,9 +5,6 @@ import org.joda.time.LocalDate;
 
 import java.util.List;
 
-/**
- * Created by Alexey on 21.03.2017.
- */
 public class ContactDTO {
     private long contactId;
     private String name;

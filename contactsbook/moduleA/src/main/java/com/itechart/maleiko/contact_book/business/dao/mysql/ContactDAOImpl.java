@@ -1,11 +1,11 @@
 package com.itechart.maleiko.contact_book.business.dao.mysql;
 
 import com.itechart.maleiko.contact_book.business.dao.ContactDAO;
-import com.itechart.maleiko.contact_book.business.dao.DAO;
 import com.itechart.maleiko.contact_book.business.dao.PairResultSize;
 import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
 import com.itechart.maleiko.contact_book.business.entity.Contact;
 import com.itechart.maleiko.contact_book.business.entity.Image;
+import com.itechart.maleiko.contact_book.business.utils.PropertiesLoader;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -13,7 +13,6 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,7 +23,6 @@ import java.sql.Date;
 import java.util.*;
 
 public class ContactDAOImpl implements ContactDAO {
-    private Properties properties;
     private final String FILE_STORAGE_PROPERTIES_FILE_NAME;
     private final String FIND_ALL_CONTACTS_QUERY;
     private final String FIND_ALL_CONTACTS_SORT_AND_LIMIT_QUERY;
@@ -80,7 +78,7 @@ public class ContactDAOImpl implements ContactDAO {
         COUNT_NOT_DELETED_CONTACTS_QUERY = "SELECT COUNT(*) FROM contact WHERE deletion_date IS NULL ";
     }
 
-    public ContactDAOImpl(AttachmentDAOImpl attachmentDAO, PhoneNumberDAOImpl phoneNumberDAO) {
+    ContactDAOImpl(AttachmentDAOImpl attachmentDAO, PhoneNumberDAOImpl phoneNumberDAO) {
         this.attachmentDAO = attachmentDAO;
         this.phoneNumberDAO = phoneNumberDAO;
     }
@@ -111,8 +109,6 @@ public class ContactDAOImpl implements ContactDAO {
 
     @Override
     public List<Contact> getAll(int skip, int limit) throws DAOException {
-        LOGGER.info("method: getAll({})", conn);
-
         List<Contact> contacts = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(FIND_ALL_CONTACTS_SORT_AND_LIMIT_QUERY)) {
             stmt.setInt(1, skip);
@@ -124,7 +120,7 @@ public class ContactDAOImpl implements ContactDAO {
             }
         } catch (SQLException e) {
             String message = "Error retrieving contacts. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
         return contacts;
@@ -132,8 +128,6 @@ public class ContactDAOImpl implements ContactDAO {
 
     @Override
     public Contact findById(long id) throws DAOException {
-        LOGGER.info("method: findById({}, {})", conn, id);
-
         Contact contact = null;
         try (PreparedStatement stmt = conn.prepareStatement(FIND_CONTACT_BY_ID_QUERY)) {
             stmt.setLong(1, id);
@@ -143,7 +137,7 @@ public class ContactDAOImpl implements ContactDAO {
             }
         } catch (SQLException e) {
             String message = "Error finding contact by id. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
         return contact;
@@ -186,7 +180,7 @@ public class ContactDAOImpl implements ContactDAO {
             contact.setContactId(getInsertedRowId(stmt));
         } catch (SQLException e) {
             String message = "Error saving contacts. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
         return contact;
@@ -214,7 +208,7 @@ public class ContactDAOImpl implements ContactDAO {
     }
 
     private String generateDestinationPathForStoringProfileImage(Contact contact) throws DAOException {
-        properties = getFileStorageProperties();
+        Properties properties = PropertiesLoader.load(FILE_STORAGE_PROPERTIES_FILE_NAME);
         Path destination = Paths.get(properties.getProperty("profileImageContainer"))
                 .resolve(Long.toString(contact.getContactId()));
         return destination + File.separator;
@@ -237,14 +231,13 @@ public class ContactDAOImpl implements ContactDAO {
             savePath.executeUpdate();
         } catch (SQLException e) {
             String message = "Error updating contact image info. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
 
     @Override
     public void update(Contact contact) throws DAOException {
-        LOGGER.info("method: update({}, {})", conn, contact.getClass().getSimpleName());
         updateContactInfo(contact);
         if (contact.getProfileImage() != null) {
             List<Long> ids = new ArrayList<>();
@@ -275,7 +268,7 @@ public class ContactDAOImpl implements ContactDAO {
             stmt.executeUpdate();
         } catch (SQLException e) {
             String message = "Error updating contact. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
@@ -303,7 +296,7 @@ public class ContactDAOImpl implements ContactDAO {
             }
         } catch (SQLException e) {
             String message = "Error finding images' paths. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
         return fullPaths;
@@ -340,7 +333,6 @@ public class ContactDAOImpl implements ContactDAO {
         }
     }
 
-    //TODO poprobovat vynesty etot metod v otdelnyj class i parametrizovat ego sql zaprosom
     private void deleteContactsByIds(List<Long> ids) throws DAOException {
         try (PreparedStatement stmt = conn.prepareStatement(DELETE_CONTACT_BY_ID_QUERY)) {
             for (Long id : ids) {
@@ -350,14 +342,13 @@ public class ContactDAOImpl implements ContactDAO {
             stmt.executeBatch();
         } catch (SQLException e) {
             String message = "Error deleting contacts by ids. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
     }
 
     @Override
     public PairResultSize findByGivenParameters(Map<String, Object> fieldValue) throws DAOException {
-        LOGGER.info("method: findByGivenParameters({}, {})", conn, fieldValue.getClass().getSimpleName());
         List<Contact> contactList = new ArrayList<>();
         PairResultSize pair = new PairResultSize();
         try {
@@ -376,7 +367,6 @@ public class ContactDAOImpl implements ContactDAO {
                 }
                 Object o = fieldValue.get(parameter);
                 searchParameters += " AND ";
-                //ToDO --- ploho: kod zavisit ot konkretnogo tipa
                 if (o instanceof LocalDate) {
                     org.joda.time.LocalDate ld = (LocalDate) o;
                     java.sql.Date date = new Date(ld.toDateTimeAtStartOfDay().getMillis());
@@ -428,7 +418,7 @@ public class ContactDAOImpl implements ContactDAO {
             }
         } catch (SQLException e) {
             String message = "Error searching contacts. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
         pair.setContactList(contactList);
@@ -444,7 +434,7 @@ public class ContactDAOImpl implements ContactDAO {
             }
         } catch (SQLException e) {
             String message = "Error retrieving id of generated record. " +
-                    "SQLState: " + e.getSQLState() + "Error code: " + e.getErrorCode() + "Message: " + e.getMessage();
+                    "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
         }
         return generatedId;
@@ -452,8 +442,6 @@ public class ContactDAOImpl implements ContactDAO {
 
     @Override
     public int getNumberOfContacts() throws DAOException {
-        LOGGER.info("method: getNumberOfContacts( )");
-
         int numberOfContacts;
         try (PreparedStatement stmt = conn.prepareStatement(COUNT_NOT_DELETED_CONTACTS_QUERY)) {
             ResultSet rs = stmt.executeQuery();
@@ -496,7 +484,7 @@ public class ContactDAOImpl implements ContactDAO {
         if (!imagePaths.isEmpty()) {
             String imagePath = imagePaths.get(0);
             if (imagePath == null) {
-                Properties properties = getFileStorageProperties();
+                Properties properties = PropertiesLoader.load(FILE_STORAGE_PROPERTIES_FILE_NAME);
                 image = Paths.get(properties.getProperty("defaultPicturePath"));
                 if (Files.notExists(image)) {
                     String message = "Default picture on path: " + image.toString() + " doesn't exist";
@@ -508,7 +496,7 @@ public class ContactDAOImpl implements ContactDAO {
                     LOGGER.error("Profile image of contact(id = {}) doesn't exist. Contact info is being updated", id);
                     setContactProfileImagePathToNull(id);
 
-                    Properties properties = getFileStorageProperties();
+                    Properties properties = PropertiesLoader.load(FILE_STORAGE_PROPERTIES_FILE_NAME);
                     image = Paths.get(properties.getProperty("defaultPicturePath"));
                     if (Files.notExists(image)) {
                         String message = "Default picture on path: " + image.toString() + " doesn't exist";
@@ -518,7 +506,7 @@ public class ContactDAOImpl implements ContactDAO {
             }
             return createImage(image);
         } else if (id == 0) {
-            Properties properties = getFileStorageProperties();
+            Properties properties = PropertiesLoader.load(FILE_STORAGE_PROPERTIES_FILE_NAME);
             image = Paths.get(properties.getProperty("defaultPicturePath"));
             if (Files.notExists(image)) {
                 String message = "Default picture on path: " + image.toString() + " doesn't exist";
@@ -548,16 +536,6 @@ public class ContactDAOImpl implements ContactDAO {
             String message = "Error retrieving quantity of contacts. " +
                     "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
             throw new DAOException(message, e);
-        }
-    }
-
-    private Properties getFileStorageProperties() throws DAOException {
-        try {
-            Properties properties = new Properties();
-            properties.load(ContactDAOImpl.class.getClassLoader().getResourceAsStream(FILE_STORAGE_PROPERTIES_FILE_NAME));
-            return properties;
-        } catch (IOException e) {
-            throw new DAOException("Failed access file storage properties. ", e);
         }
     }
 }

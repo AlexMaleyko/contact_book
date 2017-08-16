@@ -1,12 +1,8 @@
 package com.itechart.maleiko.contact_book.business.dao;
 
+import com.itechart.maleiko.contact_book.business.dao.mysql.MySQLDAOFactory;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Properties;
 
 import static org.junit.Assert.*;
 

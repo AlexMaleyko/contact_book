@@ -27,8 +27,8 @@ public class QuartzListener extends QuartzInitializerListener {
                     CronScheduleBuilder.cronSchedule("0 58 10-17 1/1 * ? *")).startNow().build();
             scheduler.scheduleJob(jobDetail, trigger);
             scheduler.start();
-        } catch (Exception e) {
-            LOGGER.error("Произошла ошибка {}", e.getMessage());
+        } catch (SchedulerException e) {
+            LOGGER.error("Error in QuartzListener {}", e.getMessage());
         }
     }
 }

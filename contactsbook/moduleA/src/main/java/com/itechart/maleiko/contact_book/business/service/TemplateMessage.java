@@ -7,16 +7,13 @@ import org.stringtemplate.v4.STGroupFile;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Alexey on 10.04.2017.
- */
 public class TemplateMessage {
     private static final org.slf4j.Logger LOGGER=
             org.slf4j.LoggerFactory.getLogger(TemplateMessage.class);
     private String name;
     private String template;
     private ST stTemplate;
-    public TemplateMessage(String name){
+    private TemplateMessage(String name){
         STGroup messageTemplates = new STGroupFile("messageTemplates.stg");
         ST template1 = messageTemplates.getInstanceOf(name);
         this.stTemplate = messageTemplates.getInstanceOf(name);

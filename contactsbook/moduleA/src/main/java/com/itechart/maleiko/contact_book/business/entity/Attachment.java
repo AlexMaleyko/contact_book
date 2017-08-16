@@ -25,10 +25,6 @@ public class Attachment {
         return bytes;
     }
 
-    public void setBytes(byte[] bytes) {
-        this.bytes = bytes;
-    }
-
     public String getLength() {
         return length;
     }

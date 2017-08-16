@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import com.itechart.maleiko.contact_book.business.service.ContactController;
 import com.itechart.maleiko.contact_book.business.service.TemplateMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -16,13 +18,9 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * Created by Alexey on 03.04.2017.
- */
 public class SearchContacts implements Command {
     private ContactController controller;
-    private static final org.slf4j.Logger LOGGER=
-            org.slf4j.LoggerFactory.getLogger(SearchContacts.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SearchContacts.class);
 
 
     public SearchContacts(){
@@ -30,16 +28,13 @@ public class SearchContacts implements Command {
     }
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOGGER.info("method: execute");
 
-        List<ContactDTO> contactDTOList = null;
-        PairResultSize pair = null;
+        List<ContactDTO> contactDTOList;
+        PairResultSize pair;
         if(Integer.parseInt(request.getParameter("isSameSearch")) == 0) {
 
             Map<String, String[]> parameterMap = request.getParameterMap();
             Set<String> keySet = request.getParameterMap().keySet();
-            for (String s : keySet) {
-            }
             List<String> filledParamNames = new ArrayList<>();
 
             for (String s : keySet) {
@@ -48,7 +43,9 @@ public class SearchContacts implements Command {
                 }
             }
             if (keySet.isEmpty()) {
-                throw new RuntimeException("You didn't fill any input field.");
+                LOGGER.error("None of search fields was filled");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
             }
 
             LocalDate date = null;
@@ -67,13 +64,14 @@ public class SearchContacts implements Command {
                     filledParamNames.remove("month");
                     filledParamNames.remove("year");
                 } else {
-                    //redirect to error page
-                    throw new RuntimeException("You didn't complete all date fields");
+                    LOGGER.error("Some date fields weren't specified");
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    return;
                 }
             }
             Map<String, Object> fieldValue = new HashMap<>();
             for (String s : filledParamNames) {
-                fieldValue.put(s, (parameterMap.get(s)[0]).trim());//mysql doesn't ignore whitespaces in beginning of the string
+                fieldValue.put(s, (parameterMap.get(s)[0]).trim());
             }
             if (date != null) {
                 fieldValue.put("birth", date);

@@ -5,9 +5,6 @@ import com.itechart.maleiko.contact_book.business.model.ContactDTO;
 
 import java.util.List;
 
-/**
- * Created by Alexey on 12.04.2017.
- */
 public class PairResultSize {
     private List<Contact> contactList;
     private List<ContactDTO> contactDTOList;

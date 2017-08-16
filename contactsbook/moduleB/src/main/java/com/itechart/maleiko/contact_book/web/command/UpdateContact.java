@@ -29,7 +29,7 @@ public class UpdateContact implements Command {
             contactDTO = controller.getContactDTOById(id);
         } catch (DAOException e) {
             LOGGER.error("{}", e.getMessage());
-            response.sendError(500);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
         request.setAttribute("contact",contactDTO);

@@ -2,12 +2,14 @@ package com.itechart.maleiko.contact_book.business.dao;
 
 //import com.sun.xml.internal.bind.v2.model.annotation.RuntimeInlineAnnotationReader;
 
+import com.itechart.maleiko.contact_book.business.dao.exceptions.UnsupportedDBMSException;
+import com.itechart.maleiko.contact_book.business.dao.mysql.MySQLDAOFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 public class DAOFactoryProducer {
-    private final String DATABASE_PROPERTIES_FILE_NAME = "database.properties";
     private DAOFactory daoFactory;
 
     private static DAOFactoryProducer factoryProducerInstance = new DAOFactoryProducer();
@@ -26,19 +28,20 @@ public class DAOFactoryProducer {
     }
 
     private void instantiateDaoFactory(){
-        switch (determineCurrentDBMS()) {
+        String currentDBMS = determineCurrentDBMS();
+        switch (currentDBMS) {
             case "mysql": {
                 daoFactory = new MySQLDAOFactory();
                 break;
             }
             default : {
-                throw new RuntimeException("specified DBMS is not supported: " + determineCurrentDBMS());
+                throw new UnsupportedDBMSException("specified DBMS is not supported: " + currentDBMS);
             }
         }
     }
     private String determineCurrentDBMS() {
         Properties properties = new Properties();
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(DATABASE_PROPERTIES_FILE_NAME);
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("database.properties");
         try{
             properties.load(inputStream);
         }catch (IOException e){

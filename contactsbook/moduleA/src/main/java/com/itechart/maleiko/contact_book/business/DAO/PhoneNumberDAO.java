@@ -19,5 +19,5 @@ public interface PhoneNumberDAO extends DAO{
 
     void deleteByContactId(long id) throws DAOException;
 
-    void deleteById(List<Long> ids) throws DAOException;
+    void deleteByIds(List<Long> ids) throws DAOException;
 }

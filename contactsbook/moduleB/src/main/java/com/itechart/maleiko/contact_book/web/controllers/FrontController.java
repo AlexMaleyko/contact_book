@@ -18,47 +18,19 @@ public class FrontController extends HttpServlet {
     private static final org.slf4j.Logger LOGGER =
             org.slf4j.LoggerFactory.getLogger(FrontController.class);
 
-    private Map<String, String> commandMapper;
-
-    @Override
-    public void init(ServletConfig config) {
-
-        try {
-            super.init(config);
-            commandMapper = new HashMap<>();
-            commandMapper.put("/SendEmail", "SendEmail");
-            commandMapper.put("/EditContact", "EditContact");
-            commandMapper.put("/SaveContact", "SaveContact");
-            commandMapper.put("/Search", "SearchContacts");
-            commandMapper.put("/CreateContactForm", "CreateContact");
-            commandMapper.put("/ContactForm", "GetContact");
-            commandMapper.put("/DeleteContact", "DeleteContact");
-            commandMapper.put("/ContactList", "GetContactList");
-            commandMapper.put("/UpdateContact", "UpdateContact");
-            commandMapper.put("/image", "GetImage");
-            commandMapper.put("/attachment", "GetAttachment");
-
-        } catch (ServletException e) {
-            LOGGER.error("{}", e.getMessage());
-        }
-    }
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOGGER.info("method doPost");
         processRequest(request, response);
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOGGER.info("method doGet");
         processRequest(request, response);
     }
 
     private void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException{
         String pathInfo = request.getPathInfo();
-        LOGGER.info("{}", pathInfo);
 
         if (pathInfo != null &&
                 (pathInfo.contains("/resources/") || pathInfo.contains("/pictures/") || pathInfo.endsWith(".jsp"))) {
@@ -69,7 +41,6 @@ public class FrontController extends HttpServlet {
         } else {
            // String commandName = commandMapper.get(request.getPathInfo());
             CommandFactory commandFactory = new CommandFactory();
-            LOGGER.info("pathInfo: {}", request.getPathInfo());
             Command command = commandFactory.getCommand(request.getPathInfo());
             command.execute(request, response);
         }

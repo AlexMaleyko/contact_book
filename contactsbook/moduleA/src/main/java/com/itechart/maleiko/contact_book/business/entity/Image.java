@@ -1,12 +1,9 @@
 package com.itechart.maleiko.contact_book.business.entity;
 
-/**
- * Created by Alexey on 11.08.2017.
- */
 public class Image {
-    String name;
-    String length;
-    byte[] byteRepresentation;
+    private String name;
+    private String length;
+    private byte[] byteRepresentation;
 
     public Image(String name, String length, byte[] byteRepresentation) {
         this.name = name;
@@ -34,7 +31,4 @@ public class Image {
         return byteRepresentation;
     }
 
-    public void setByteRepresentation(byte[] byteRepresentation) {
-        this.byteRepresentation = byteRepresentation;
-    }
 }

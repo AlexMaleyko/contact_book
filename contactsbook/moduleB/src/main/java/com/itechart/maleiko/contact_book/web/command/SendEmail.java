@@ -5,6 +5,8 @@ import com.itechart.maleiko.contact_book.business.model.ContactDTO;
 import com.itechart.maleiko.contact_book.business.service.exceptions.ServiceException;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -18,25 +20,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Alexey on 10.04.2017.
- */
 public class SendEmail implements Command{
     private EmailSender sender;
 
-    public SendEmail(){
+    SendEmail(){
         sender = new EmailSender();
     }
-    private static final org.slf4j.Logger LOGGER=
-            org.slf4j.LoggerFactory.getLogger(SaveContact.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SendEmail.class);
 
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOGGER.info("metod: execute");
         try {
             String[] recipients = request.getParameterValues("recipient");
             String template = request.getParameter("pattern");
             if (recipients == null) {
-                LOGGER.error("recipient is null");
+                LOGGER.error("Recipients array is null");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
             }
             List<Long> recipientIds = new ArrayList<>();
             for (int i = 0; i < recipients.length; i++) {
@@ -45,18 +44,9 @@ public class SendEmail implements Command{
             if (!StringUtils.isNotBlank(template)) {
                 String text = request.getParameter("mailText").trim();
                 String subject = request.getParameter("subject").trim();
-                if (text == null) {
-                    LOGGER.error("text is null");
-                }
-                if (subject == null) {
-                    LOGGER.error("subject is null");
-                }
                 sender.sendEmail(recipientIds, subject, text);
             } else {
                 String subject = request.getParameter("subject").trim();
-                if (subject == null) {
-                    LOGGER.error("subject is null");
-                }
                 List<Long> list = new ArrayList<>();
                 List<ContactDTO> contactDTOList = (new ContactController()).getContactDTOsByIdList(recipientIds);
                 STGroup messageTemplates = new STGroupFile("messageTemplates.stg");
@@ -97,7 +87,7 @@ public class SendEmail implements Command{
                     sender.sendEmail(list, subject, stTemplate.render());
                 }
             }
-        }catch (DAOException e){
+        }catch (DAOException | ServiceException e){
             LOGGER.error("{}", e.getMessage());
             response.sendError(500);
             return;

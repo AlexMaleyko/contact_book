@@ -3,6 +3,8 @@ package com.itechart.maleiko.contact_book.web.command;
 import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
 import com.itechart.maleiko.contact_book.business.service.ContactController;
 import com.itechart.maleiko.contact_book.business.service.exceptions.ServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,8 +20,7 @@ public class DeleteContact  implements Command{
         controller = new ContactController();
     }
 
-    private static final org.slf4j.Logger LOGGER =
-            org.slf4j.LoggerFactory.getLogger(DeleteContact.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeleteContact.class);
 
     public void execute(HttpServletRequest request, HttpServletResponse responce)
             throws ServletException, IOException {
@@ -34,7 +35,7 @@ public class DeleteContact  implements Command{
             controller.deleteContactsByIds(ids);
         } catch (DAOException | ServiceException e){
             LOGGER.error("{}", e.getMessage());
-            responce.sendError(500);
+            responce.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
         responce.sendRedirect("contacts");

@@ -22,8 +22,6 @@ public class CharsetFilter implements Filter {
 
         if (null == req.getCharacterEncoding()) {
             req.setCharacterEncoding(encoding);
-
-            LOGGER.info("character encoding is set to {}", encoding);
         }
         chain.doFilter(req, resp);
     }

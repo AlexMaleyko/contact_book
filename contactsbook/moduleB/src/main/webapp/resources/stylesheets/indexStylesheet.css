@@ -112,3 +112,10 @@ input[type='text']{
     opacity:1;
     color: white;
 }
+a, a:visited{
+    color: blue;
+    text-decoration: none;
+}
+a:hover{
+    color: green;
+}

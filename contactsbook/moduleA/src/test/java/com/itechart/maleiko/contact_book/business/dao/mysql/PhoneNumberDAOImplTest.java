@@ -136,7 +136,7 @@ public class PhoneNumberDAOImplTest {
             phoneNumberDAO.save(sampleNumbers);
             List<PhoneNumber> sampleNumbersWithId = retrieveAllPhoneNumbers();
             List<Long> ids = sampleNumbersWithId.stream().map(PhoneNumber::getNumberId).collect(Collectors.toList());
-            phoneNumberDAO.deleteById(ids);
+            phoneNumberDAO.deleteByIds(ids);
             List<PhoneNumber> deletionResult = retrieveAllPhoneNumbers();
             assertTrue(deletionResult.isEmpty());
         }

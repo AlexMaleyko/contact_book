@@ -1,6 +1,4 @@
-package com.itechart.maleiko.contact_book.business.entity; /**
- * Created by Alexey on 15.03.2017.
- */
+package com.itechart.maleiko.contact_book.business.entity;
 
 import org.apache.commons.fileupload.FileItem;
 
@@ -24,8 +22,8 @@ public class Contact {
     private String postalCode;
     private FileItem profileImage;
     private String profilePicturePath;
-    List<Attachment> attachments;
-    List<PhoneNumber> phoneNumbers;
+    private List<Attachment> attachments;
+    private List<PhoneNumber> phoneNumbers;
 
     public List<Attachment> getAttachments() {
         return attachments;
@@ -94,15 +92,6 @@ public class Contact {
     }
 
     public void setBirth(java.sql.Date birth) {
-       /* SimpleDateFormat sdf=new SimpleDateFormat("yyyy-mm-dd");
-        java.util.Date date=null;
-        java.sql.Date sqlDate= null;
-        try {
-           date = sdf.parse(birthDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        sqlDate=new Date(date.getTime());*/
         this.birth = birth;
     }
 

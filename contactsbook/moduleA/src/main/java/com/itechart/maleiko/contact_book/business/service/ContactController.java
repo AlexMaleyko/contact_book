@@ -41,7 +41,6 @@ public class ContactController {
     }
 
     public List<ContactDTO> getAllContactDTO(int skip, int limit) throws DAOException{
-        LOGGER.info("method: getAllContactDTO()");
 
         List<ContactDTO> contactDTOList = new ArrayList<>();
         List<Contact> contactList;
@@ -59,7 +58,6 @@ public class ContactController {
     }
 
     public int getNumberOfContacts() throws DAOException{
-        LOGGER.info("method: getNumberOfContactPages()");
         int numberOfContacts;
         Connection connection = null;
         try {
@@ -73,8 +71,6 @@ public class ContactController {
     }
 
     public PairResultSize findContactDTOs(Map<String, Object> fieldValue) throws DAOException{
-        LOGGER.info("method: findContactDTOs({})", fieldValue.getClass().getSimpleName());
-
         PairResultSize newPair = new PairResultSize();
         PairResultSize receivedPair;
         List<ContactDTO> contactDTOList = new ArrayList<>();
@@ -97,8 +93,6 @@ public class ContactController {
     }
 
     public ContactDTO getContactDTOById(long id) throws DAOException{
-        LOGGER.info("method: getContactDTOById({})", id);
-
         ContactDTO contactDTO;
         Connection connection = null;
         try {
@@ -113,8 +107,6 @@ public class ContactController {
     }
 
     public List<ContactDTO> getContactDTOsByIdList(List<Long> ids) throws DAOException{
-        LOGGER.info("method: getContactDTOsByIdList({})", ids.getClass().getSimpleName());
-
         List<ContactDTO> contactDTOList = new ArrayList<>();
         List<Contact> contactList = new ArrayList<>();
         Connection connection = null;
@@ -185,7 +177,7 @@ public class ContactController {
             //delete numbers
             List<Long> phoneNumberDeleteList = contactDTO.getPhoneNumberDeleteList();
             if (!phoneNumberDeleteList.isEmpty()) {
-                phoneNumberDAO.deleteById(phoneNumberDeleteList);
+                phoneNumberDAO.deleteByIds(phoneNumberDeleteList);
             }
 
             //delete attachments
@@ -210,8 +202,6 @@ public class ContactController {
     }
 
     public void deleteContactsByIds(List<Long> ids) throws ServiceException, DAOException{
-        LOGGER.info("method: deleteContactsByIds({})", ids);
-
         Connection connection = null;
         try {
             connection = connectionController.provideConnection();
@@ -230,8 +220,6 @@ public class ContactController {
     }
 
     public void saveContact(ContactDTO contactDTO) throws ServiceException, DAOException{
-        LOGGER.info("method: saveContact({}, {})", contactDTO.getClass().getSimpleName());
-
         Contact contact = modelEntityConverter.convertModelToEntity(contactDTO);
         Connection connection = null;
         try {

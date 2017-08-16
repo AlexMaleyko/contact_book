@@ -10,30 +10,26 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * Created by Alexey on 02.04.2017.
- */
 public class GetContact implements Command {
     private ContactController controller;
 
-    public GetContact(){
+    GetContact(){
         controller = new ContactController();
     }
 
     private static final org.slf4j.Logger LOGGER =
-            org.slf4j.LoggerFactory.getLogger(DeleteContact.class);
+            org.slf4j.LoggerFactory.getLogger(GetContact.class);
 
     public void execute(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        LOGGER.info("execute");
         String[] parsedUrl = request.getPathInfo().split("/");
         long contactId=Long.parseLong(parsedUrl[parsedUrl.length -1]);
-        ContactDTO contactDTO = null;
+        ContactDTO contactDTO;
         try {
             contactDTO = controller.getContactDTOById(contactId);
         } catch (DAOException e) {
             LOGGER.error("{}", e.getMessage());
-            response.sendError(500);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
 

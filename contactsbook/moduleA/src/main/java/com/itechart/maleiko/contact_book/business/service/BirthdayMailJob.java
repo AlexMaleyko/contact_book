@@ -22,10 +22,10 @@ public class BirthdayMailJob implements Job {
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        LOGGER.info("Job started");
+        LOGGER.info("BirthdayMailJob started");
         try {
             ContactController controller = new ContactController();
-            List<ContactDTO> contactDTOList = controller.getAllContactDTO(0, controller.getNumberOfContacts());
+            List<ContactDTO> contactDTOList = controller.getAllContactDTO(0, Integer.MAX_VALUE);
             if (contactDTOList.isEmpty()) {
                 LOGGER.info("No records in datasource. Job finished.");
                 return;
@@ -60,12 +60,8 @@ public class BirthdayMailJob implements Job {
                 list.clear();
             }
             LOGGER.info("email sent to {} people", hasBirthday.size());
-        }catch (DAOException e){
+        }catch (DAOException | ServiceException e) {
             throw new JobExecutionException(e.getMessage(), e);
-        }
-        finally {
-            //ToDo perform resource logic
-            System.out.println("finally");
         }
     }
 }

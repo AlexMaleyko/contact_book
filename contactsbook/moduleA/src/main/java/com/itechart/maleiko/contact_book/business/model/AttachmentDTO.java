@@ -4,9 +4,6 @@ import org.apache.commons.fileupload.FileItem;
 
 import java.sql.Timestamp;
 
-/**
- * Created by Alexey on 21.03.2017.
- */
 public class AttachmentDTO {
     private long attachmentId;
     private String filePath;

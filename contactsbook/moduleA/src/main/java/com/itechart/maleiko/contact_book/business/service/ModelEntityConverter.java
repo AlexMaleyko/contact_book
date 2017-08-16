@@ -11,13 +11,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Alexey on 21.03.2017.
- */
-public class ModelEntityConverter {
-
-    private static final org.slf4j.Logger LOGGER =
-            org.slf4j.LoggerFactory.getLogger(ModelEntityConverter.class);
+class ModelEntityConverter {
 
     private List<PhoneNumber> convertModelToEntityPhoneNumber(List<PhoneNumberDTO> models){
         List<PhoneNumber> entities = new ArrayList<>();
@@ -49,8 +43,7 @@ public class ModelEntityConverter {
         return entities;
     }
 
-    public Contact convertModelToEntity(ContactDTO model){
-
+    Contact convertModelToEntity(ContactDTO model){
         Contact entity = new Contact(model.getName(),model.getSurname());
         entity.setContactId(model.getContactId());
         entity.setPatronymic(model.getPatronymic());

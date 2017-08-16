@@ -43,7 +43,7 @@ public class ConnectionController {
     private void initializeDataSource() throws DAOException {
         if(dataSource == null){
             dataSource = new DataSource();
-            Properties properties = getDataSourceProperties();
+            Properties properties = PropertiesLoader.load("database.properties");
             String host = properties.getProperty("host");
             int port = Integer.parseInt(properties.getProperty("port"));
             String userName = properties.getProperty("user");
@@ -54,16 +54,6 @@ public class ConnectionController {
             dataSource.setUsername(userName);
             dataSource.setPassword(password);
             dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        }
-    }
-
-    private Properties getDataSourceProperties() throws DAOException {
-        try {
-            Properties properties = new Properties();
-            properties.load(ConnectionController.class.getClassLoader().getResourceAsStream("database.properties"));
-            return properties;
-        }catch (IOException e){
-            throw new DAOException("Failed loading database properties. ", e);
         }
     }
 
