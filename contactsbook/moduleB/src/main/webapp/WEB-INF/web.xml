@@ -41,10 +41,10 @@
         <param-name>javax.servlet.jsp.jstl.sql.dataSource</param-name>
         <param-value>jdbc/shop1db</param-value>
     </context-param>-->
-   <!-- <resource-ref>
+    <resource-ref>
         <description>DB Connection</description>
         <res-ref-name>jdbc/contactBook</res-ref-name>
         <res-type>javax.sql.DataSource</res-type>
         <res-auth>Container</res-auth>
-    </resource-ref>-->
+    </resource-ref>
 </web-app>
