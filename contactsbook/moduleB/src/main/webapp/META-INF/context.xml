@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context>
 
-    <Resource url="jdbc:mysql://localhost:3306/contact_book" driverClassName="com.mysql.jdbc.Driver"
+    <Resource url="jdbc:mysql://localhost:3306/contact_book?useSSL=false" driverClassName="com.mysql.jdbc.Driver"
               password="11121314f"
               username="root"
               maxWaitMillis="10000" maxIdle="30" maxTotal="100"
-              type="javax.sql.DataSource" auth="Container" name="jdbc/contactBook"/>
+              type="javax.sql.DataSource" auth="Container" name="jdbc/contactBook"
+              factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+    />
 </Context>
