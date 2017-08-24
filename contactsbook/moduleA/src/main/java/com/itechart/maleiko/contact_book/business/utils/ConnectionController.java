@@ -1,19 +1,19 @@
 package com.itechart.maleiko.contact_book.business.utils;
 
 import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
+import com.itechart.maleiko.contact_book.business.dao.exceptions.DataSourceInitializationException;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Properties;
 
 public class ConnectionController {
     private final Logger LOGGER = LoggerFactory.getLogger(ConnectionController.class);
-
-    private static final String MYSQL_URL = "jdbc:mysql://";
 
     private static ConnectionController instance = new ConnectionController();
 
@@ -40,20 +40,15 @@ public class ConnectionController {
         return connection;
     }
 
-    private void initializeDataSource() throws DAOException {
+    private void initializeDataSource(){
         if(dataSource == null){
-            dataSource = new DataSource();
-            Properties properties = PropertiesLoader.load("database.properties");
-            String host = properties.getProperty("host");
-            int port = Integer.parseInt(properties.getProperty("port"));
-            String userName = properties.getProperty("user");
-            String password = properties.getProperty("password");
-            String dbName = properties.getProperty("db_name");
-            String dataSourceURL = MYSQL_URL + host + ":" + port + "/" + dbName+"?useSSL=false";
-            dataSource.setUrl(dataSourceURL);
-            dataSource.setUsername(userName);
-            dataSource.setPassword(password);
-            dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+            try {
+                Context initContext = new InitialContext();
+                Context envContext = (Context) initContext.lookup("java:comp/env");
+                dataSource = (DataSource) envContext.lookup("jdbc/contactBook");
+            }catch(NamingException e){
+                throw new DataSourceInitializationException("Failed to initialize DataSource. Message: " + e.getMessage(), e);
+            }
         }
     }
 
@@ -61,7 +56,7 @@ public class ConnectionController {
         try {
             connection.close();
         }catch (SQLException e){
-            LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
+            LOGGER.error("Error closing connection. SQLState: {} ErrorCode: {} Message: {}",
                     e.getSQLState(), e.getErrorCode(), e.getMessage());
         }
     }
@@ -71,7 +66,7 @@ public class ConnectionController {
             LOGGER.error("Transaction is being rolled back");
             connection.rollback();
         } catch (SQLException e) {
-            LOGGER.error("SQLState: {} ErrorCode: {} Message: {}",
+            LOGGER.error("Failed rollback transaction. SQLState: {} ErrorCode: {} Message: {}",
                     e.getSQLState(), e.getErrorCode(), e.getMessage());
         }
     }
