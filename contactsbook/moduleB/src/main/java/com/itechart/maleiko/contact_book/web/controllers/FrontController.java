@@ -3,15 +3,11 @@ package com.itechart.maleiko.contact_book.web.controllers;
 import com.itechart.maleiko.contact_book.web.command.Command;
 import com.itechart.maleiko.contact_book.web.command.CommandFactory;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class FrontController extends HttpServlet {
 
@@ -42,7 +38,12 @@ public class FrontController extends HttpServlet {
            // String commandName = commandMapper.get(request.getPathInfo());
             CommandFactory commandFactory = new CommandFactory();
             Command command = commandFactory.getCommand(request.getPathInfo());
-            command.execute(request, response);
+            try {
+                command.execute(request, response);
+            }catch(RuntimeException e){
+                LOGGER.error("{}", e.getMessage());
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
         }
     }
 
