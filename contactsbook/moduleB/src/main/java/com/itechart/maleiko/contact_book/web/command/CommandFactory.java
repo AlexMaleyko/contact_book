@@ -4,7 +4,7 @@ import com.itechart.maleiko.contact_book.business.service.ContactController;
 
 public class CommandFactory {
     private static final org.slf4j.Logger LOGGER=
-            org.slf4j.LoggerFactory.getLogger(SaveContact.class);
+            org.slf4j.LoggerFactory.getLogger(CommandFactory.class);
 
     public Command getCommand(String commandName){
         LOGGER.info("Command requested by path: {} ", commandName);
