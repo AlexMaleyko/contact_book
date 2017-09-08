@@ -8,9 +8,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
 
-/**
- * Created by Alexey on 10.04.2017.
- */
 @WebListener
 public class QuartzListener extends QuartzInitializerListener {
     private static final org.slf4j.Logger LOGGER=

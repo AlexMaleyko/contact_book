@@ -31,7 +31,7 @@ public class AttachmentDAOImpl implements AttachmentDAO {
     private final String UPDATE_ATTACHMENT_QUERY;
     private Connection conn;
 
-    {
+    AttachmentDAOImpl(){
         SAVE_ATTACHMENT_QUERY = "INSERT INTO attachment (file_path, file_name, comment, contact_id) VALUES (?, ?, ?, ?)";
         FIND_ATTACHMENTS_BY_CONTACT_ID_QUERY = "SELECT attachment_id, file_path, file_name, upload_date, comment " +
                 "FROM attachment WHERE contact_id= ? AND deletion_date IS NULL";
@@ -124,17 +124,18 @@ public class AttachmentDAOImpl implements AttachmentDAO {
         List<Attachment> attachments = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(FIND_ATTACHMENTS_BY_CONTACT_ID_QUERY)) {
             stmt.setLong(1, contactId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Attachment attachment = new Attachment();
-                attachment.setAttachmentId(rs.getInt(1));
-                attachment.setFilePath(rs.getString(2));
-                attachment.setFileName(rs.getString(3));
-                attachment.setUploadDate(rs.getTimestamp(4));
-                attachment.setComment(rs.getString(5));
-                attachment.setContactId(contactId);
+            try(ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Attachment attachment = new Attachment();
+                    attachment.setAttachmentId(rs.getInt(1));
+                    attachment.setFilePath(rs.getString(2));
+                    attachment.setFileName(rs.getString(3));
+                    attachment.setUploadDate(rs.getTimestamp(4));
+                    attachment.setComment(rs.getString(5));
+                    attachment.setContactId(contactId);
 
-                attachments.add(attachment);
+                    attachments.add(attachment);
+                }
             }
         }catch (SQLException e){
             String message = "Error finding attachment info. " +
@@ -166,8 +167,9 @@ public class AttachmentDAOImpl implements AttachmentDAO {
     void deleteFilesFromFileSystemByContactId(long contact_id) throws DAOException {
         try (PreparedStatement findFullPaths = conn.prepareStatement(FIND_ATTACHMENTS_FILE_PATH_BY_CONTACT_ID_QUERY)) {
             findFullPaths.setLong(1, contact_id);
-            ResultSet rs = findFullPaths.executeQuery();
-            performFilesDeletion(rs);
+            try(ResultSet rs = findFullPaths.executeQuery()) {
+                performFilesDeletion(rs);
+            }
         }catch (SQLException e){
             String message = "Error finding attachment file path. " +
                     "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
@@ -196,8 +198,9 @@ public class AttachmentDAOImpl implements AttachmentDAO {
         String findAttachmentFilePathQueryWithPlaceholders = fillFindAttachmentFilePathQueryWithPlaceholders(ids.size());
         try (PreparedStatement findFullPath = conn.prepareStatement(findAttachmentFilePathQueryWithPlaceholders)){
             supplyValuesForFindFullPathStatement(findFullPath, ids);
-            ResultSet rs = findFullPath.executeQuery();
-            performFilesDeletion(rs);
+            try(ResultSet rs = findFullPath.executeQuery()) {
+                performFilesDeletion(rs);
+            }
         }catch (SQLException e){
             String message = "Error finding attachment full path. " +
                     "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
@@ -258,9 +261,10 @@ public class AttachmentDAOImpl implements AttachmentDAO {
         String attachmentPath;
         Path attachment;
         String findAttachmentFilePathQueryWithPlaceholders = fillFindAttachmentFilePathQueryWithPlaceholders(ids.size());
+        ResultSet rs = null;
         try (PreparedStatement findFullPath = conn.prepareStatement(findAttachmentFilePathQueryWithPlaceholders)) {
             supplyValuesForFindFullPathStatement(findFullPath, ids);
-            ResultSet rs = findFullPath.executeQuery();
+            rs = findFullPath.executeQuery();
             if (rs.next()) {
                 attachmentPath = rs.getString("file_path");
                 attachment = Paths.get(attachmentPath);
@@ -279,8 +283,17 @@ public class AttachmentDAOImpl implements AttachmentDAO {
             throw new DAOException(message, e);
         } catch (IOException e) {
             throw new DAOException("Error loading file: " + e.getMessage(), e);
+        }finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            }catch (SQLException e){
+                String message = "Failed to close ResultSet. " +
+                        "SQLState: " + e.getSQLState() + " Error code: " + e.getErrorCode() + " Message: " + e.getMessage();
+                LOGGER.error("{}", message);
+            }
         }
         return null;
     }
-
 }

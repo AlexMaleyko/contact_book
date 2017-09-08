@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.7.16, for Win64 (x86_64)
 --
--- Host: localhost    Database: contact_book
+-- Host: localhost    Database: contact_book_test
 -- ------------------------------------------------------
 -- Server version	5.7.16-log
 
@@ -32,7 +32,7 @@ CREATE TABLE `attachment` (
   `contact_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`attachment_id`),
   KEY `fk_attachment_contact` (`contact_id`),
-  CONSTRAINT `fk_attachment_contact` FOREIGN KEY (`contact_id`) REFERENCES `contact` (`contact_id`)
+  CONSTRAINT `fk_attachment_contact` FOREIGN KEY (`contact_id`) REFERENCES `contact` (`contact_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -71,7 +71,7 @@ CREATE TABLE `contact` (
   `deletion_date` timestamp NULL DEFAULT NULL,
   `profile_picture` varchar(260) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`contact_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -80,6 +80,7 @@ CREATE TABLE `contact` (
 
 LOCK TABLES `contact` WRITE;
 /*!40000 ALTER TABLE `contact` DISABLE KEYS */;
+INSERT INTO `contact` VALUES (1,'test_contact','test_contact',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `contact` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -101,7 +102,7 @@ CREATE TABLE `phone_number` (
   `contact_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`number_id`),
   KEY `fk_phone_number_contact` (`contact_id`),
-  CONSTRAINT `fk_phone_number_contact` FOREIGN KEY (`contact_id`) REFERENCES `contact` (`contact_id`)
+  CONSTRAINT `fk_phone_number_contact` FOREIGN KEY (`contact_id`) REFERENCES `contact` (`contact_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -123,4 +124,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-23 13:24:57
+-- Dump completed on 2017-09-08 19:49:20

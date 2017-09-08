@@ -46,8 +46,12 @@ public class ConnectionController {
                 Context initContext = new InitialContext();
                 Context envContext = (Context) initContext.lookup("java:comp/env");
                 dataSource = (DataSource) envContext.lookup("jdbc/contactBook");
-            }catch(NamingException e){
+            }catch(NamingException e) {
                 throw new DataSourceInitializationException("Failed to initialize DataSource. Message: " + e.getMessage(), e);
+            }catch (ClassCastException e) {
+                String message = "Failed to initialize DataSource." +
+                        " Specified datasource configuration was invalid. Message: " + e.getMessage();
+                throw new DataSourceInitializationException(message, e);
             }
         }
     }

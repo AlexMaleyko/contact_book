@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 
 public class SearchContacts implements Command {
@@ -88,7 +89,7 @@ public class SearchContacts implements Command {
             }
             contactDTOList = pair.getContactDTOList();
             HttpSession session = request.getSession(true);
-            session.setAttribute("contacts", contactDTOList);
+            session.setAttribute("contacts", (Serializable)contactDTOList);
             session.setAttribute("resultSetSize", pair.getResultSetSize());
         }
 
@@ -132,7 +133,7 @@ public class SearchContacts implements Command {
         request.setAttribute("isSearchPage", 1);
         request.setAttribute("paginationFormAction", "Search");
 
-        contactDTOList = (List< ContactDTO>)session.getAttribute("contacts");
+        contactDTOList = (List<ContactDTO>)session.getAttribute("contacts");
         List<ContactDTO> displayedResult = new ArrayList<>();
         for(int i = skipTotal; i < skipTotal + clientLimit; i++){
             if(i == contactDTOList.size()){

@@ -1,6 +1,3 @@
-/**
- * Created by Alexey on 03.04.2017.
- */
 function daysInMonth(month, year) {
     return new Date(year, month, 0).getDate();
 }

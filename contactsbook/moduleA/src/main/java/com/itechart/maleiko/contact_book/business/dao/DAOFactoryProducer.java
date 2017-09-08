@@ -1,7 +1,5 @@
 package com.itechart.maleiko.contact_book.business.dao;
 
-//import com.sun.xml.internal.bind.v2.model.annotation.RuntimeInlineAnnotationReader;
-
 import com.itechart.maleiko.contact_book.business.dao.exceptions.UnsupportedDBMSException;
 import com.itechart.maleiko.contact_book.business.dao.mysql.MySQLDAOFactory;
 

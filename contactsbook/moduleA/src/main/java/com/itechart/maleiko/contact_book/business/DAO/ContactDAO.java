@@ -4,14 +4,11 @@ import com.itechart.maleiko.contact_book.business.dao.exceptions.DAOException;
 import com.itechart.maleiko.contact_book.business.entity.Contact;
 import com.itechart.maleiko.contact_book.business.entity.Image;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-public interface ContactDAO extends DAO{
-    List<Contact> getAll( int skip, int limit) throws DAOException;
+public interface ContactDAO extends DAO {
+    List<Contact> getAll(int skip, int limit) throws DAOException;
 
     Contact findById(long id) throws DAOException;
 

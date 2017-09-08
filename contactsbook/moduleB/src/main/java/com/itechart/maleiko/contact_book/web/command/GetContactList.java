@@ -66,8 +66,26 @@ public class GetContactList implements Command {
             pageTotal+=1;
         }
 
+        // currentPage is calculated by the following rules:
+        //First term:
+        // total number of records skipped (skipTotal) is divided by the number of records a user wants to see on one page (clientLimit)
+        //Second term:
+        //if the user leaves on the previous pages less records than set in the clientLimit 1 is added, otherwise 0;
+        //Third term:
+        //if the user leaves on the previous pages the number of records which is not divided by clientLimit
+        // and if the remaining number of records is less than clientLimit 1 is added, otherwise 0;
+        //All these conditions are necessary for the case when a user chooses bigger clientLimit and has already skipped
+        // the number of records which can't be divided by the clientLimit
+        // the idea is to let him see the records he saw before he set bigger clientLimit + more records (depending on the clientLimit value)
+        currentPage = skipTotal/clientLimit
+                + ((double)skipTotal/(double)clientLimit<1 && (double)skipTotal/(double)clientLimit>0? 1 : 0)
+                + (((double)(skipTotal%clientLimit)/(double)clientLimit<1
+                && (double)(skipTotal%clientLimit)/(double)clientLimit>0)
+                && ((double)(numberOfContacts - skipTotal)/(double)clientLimit > 0
+                && (double)(numberOfContacts - skipTotal)/(double)clientLimit < 1) ? 1 : 0);
+
         request.setAttribute("skipTotal", skipTotal);
-        request.setAttribute("currentPage", clickedPage);
+        request.setAttribute("currentPage", currentPage);
         request.setAttribute("clientLimit", clientLimit);
         request.setAttribute("pageTotal", pageTotal);
         request.setAttribute("msgTmpl", TemplateMessage.getAllTemplates());

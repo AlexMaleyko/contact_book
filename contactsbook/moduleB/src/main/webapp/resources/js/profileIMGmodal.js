@@ -59,7 +59,6 @@ function imgPreview(evt) {
     reader.onload = (function(theFile) {
         return function(e) {
             // Render thumbnail.
-            var span = document.createElement('span');
             document.getElementById('mdlImg').src = e.target.result;
         };
     })(f);

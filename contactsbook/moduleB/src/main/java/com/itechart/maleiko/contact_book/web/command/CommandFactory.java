@@ -7,7 +7,6 @@ public class CommandFactory {
             org.slf4j.LoggerFactory.getLogger(CommandFactory.class);
 
     public Command getCommand(String commandName){
-        LOGGER.info("Command requested by path: {} ", commandName);
         Command command;
         if (commandName == null || commandName.equals("/") || commandName.equals("/contacts")) {
             command = new GetContactList();
@@ -53,7 +52,7 @@ public class CommandFactory {
                     break;
                 }
                 default:{
-                    LOGGER.error("Unknown command");
+                    LOGGER.error("Unknown command: {}", commandName);
                     command = new UnknownCommand();
                     break;
                 }

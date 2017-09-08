@@ -38,7 +38,7 @@ public class ContactDAOImpl implements ContactDAO {
     private AttachmentDAOImpl attachmentDAO;
     private PhoneNumberDAOImpl phoneNumberDAO;
 
-    {
+    ContactDAOImpl(){
         FILE_STORAGE_PROPERTIES_FILE_NAME = "fileStorage.properties";
 
         FIND_ALL_CONTACTS_QUERY = "SELECT contact_id, name, surname, patronymic, birth, " +
@@ -79,6 +79,7 @@ public class ContactDAOImpl implements ContactDAO {
     }
 
     ContactDAOImpl(AttachmentDAOImpl attachmentDAO, PhoneNumberDAOImpl phoneNumberDAO) {
+        this();
         this.attachmentDAO = attachmentDAO;
         this.phoneNumberDAO = phoneNumberDAO;
     }
@@ -113,10 +114,11 @@ public class ContactDAOImpl implements ContactDAO {
         try (PreparedStatement stmt = conn.prepareStatement(FIND_ALL_CONTACTS_SORT_AND_LIMIT_QUERY)) {
             stmt.setInt(1, skip);
             stmt.setInt(2, limit);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Contact contact = generateEntityObjectFromResultSetRow(rs);
-                contacts.add(contact);
+            try(ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Contact contact = generateEntityObjectFromResultSetRow(rs);
+                    contacts.add(contact);
+                }
             }
         } catch (SQLException e) {
             String message = "Error retrieving contacts. " +
@@ -131,9 +133,10 @@ public class ContactDAOImpl implements ContactDAO {
         Contact contact = null;
         try (PreparedStatement stmt = conn.prepareStatement(FIND_CONTACT_BY_ID_QUERY)) {
             stmt.setLong(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                contact = generateEntityObjectFromResultSetRow(rs);
+            try(ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    contact = generateEntityObjectFromResultSetRow(rs);
+                }
             }
         } catch (SQLException e) {
             String message = "Error finding contact by id. " +
@@ -275,7 +278,7 @@ public class ContactDAOImpl implements ContactDAO {
 
     @Override
     public void deleteByContactIds(List<Long> ids) throws DAOException {
-        LOGGER.info("method: deleteByContactId ({}, {})", ids);
+        LOGGER.info("deleting contacts, {}", ids);
         List<String> fullPaths = findImagesPathsByContactIds(ids);
         deleteContainingDirectories(fullPaths);
         attachmentDAO.setConnection(conn);
@@ -290,9 +293,10 @@ public class ContactDAOImpl implements ContactDAO {
         String processedQuery = fillSqlInOperatorWithPlaceholders(ids.size(), FIND_IMAGE_PATH_BY_CONTACT_ID_QUERY);
         try (PreparedStatement getPaths = conn.prepareStatement(processedQuery)) {
             supplyIdsForPreparedStatement(getPaths, ids);
-            ResultSet rs = getPaths.executeQuery();
-            while (rs.next()) {
-                fullPaths.add(rs.getString(1));
+            try(ResultSet rs = getPaths.executeQuery()) {
+                while (rs.next()) {
+                    fullPaths.add(rs.getString(1));
+                }
             }
         } catch (SQLException e) {
             String message = "Error finding images' paths. " +
@@ -406,15 +410,17 @@ public class ContactDAOImpl implements ContactDAO {
                         rsSize.setString(i, "%" + (String) preparedParameters.get(i) + "%");
                     }
                 }
-                ResultSet rs = stmt.executeQuery();
-                while (rs.next()) {
-                    Contact contact = generateEntityObjectFromResultSetRow(rs);
-                    contactList.add(contact);
+                try(ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Contact contact = generateEntityObjectFromResultSetRow(rs);
+                        contactList.add(contact);
+                    }
                 }
-                ResultSet size = rsSize.executeQuery();
-                size.next();
-                long rowNumber = size.getLong(1);
-                pair.setResultSetSize(rowNumber);
+                try(ResultSet size = rsSize.executeQuery()) {
+                    size.next();
+                    long rowNumber = size.getLong(1);
+                    pair.setResultSetSize(rowNumber);
+                }
             }
         } catch (SQLException e) {
             String message = "Error searching contacts. " +
@@ -443,8 +449,8 @@ public class ContactDAOImpl implements ContactDAO {
     @Override
     public int getNumberOfContacts() throws DAOException {
         int numberOfContacts;
-        try (PreparedStatement stmt = conn.prepareStatement(COUNT_NOT_DELETED_CONTACTS_QUERY)) {
-            ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement(COUNT_NOT_DELETED_CONTACTS_QUERY);
+             ResultSet rs = stmt.executeQuery()) {
             rs.next();
             numberOfContacts = rs.getInt(1);
         } catch (SQLException e) {
@@ -485,7 +491,7 @@ public class ContactDAOImpl implements ContactDAO {
             String imagePath = imagePaths.get(0);
             if (imagePath == null) {
                 Properties properties = PropertiesLoader.load(FILE_STORAGE_PROPERTIES_FILE_NAME);
-                image = Paths.get(properties.getProperty("defaultPicturePath"));
+                image = Paths.get(properties.getProperty("defaultPicturePath")).toAbsolutePath();
                 if (Files.notExists(image)) {
                     String message = "Default picture on path: " + image.toString() + " doesn't exist";
                     throw new DAOException(message);
@@ -497,7 +503,7 @@ public class ContactDAOImpl implements ContactDAO {
                     setContactProfileImagePathToNull(id);
 
                     Properties properties = PropertiesLoader.load(FILE_STORAGE_PROPERTIES_FILE_NAME);
-                    image = Paths.get(properties.getProperty("defaultPicturePath"));
+                    image = Paths.get(properties.getProperty("defaultPicturePath")).toAbsolutePath();
                     if (Files.notExists(image)) {
                         String message = "Default picture on path: " + image.toString() + " doesn't exist";
                         throw new DAOException(message);
@@ -507,7 +513,7 @@ public class ContactDAOImpl implements ContactDAO {
             return createImage(image);
         } else if (id == 0) {
             Properties properties = PropertiesLoader.load(FILE_STORAGE_PROPERTIES_FILE_NAME);
-            image = Paths.get(properties.getProperty("defaultPicturePath"));
+            image = Paths.get(properties.getProperty("defaultPicturePath")).toAbsolutePath();
             if (Files.notExists(image)) {
                 String message = "Default picture on path: " + image.toString() + " doesn't exist";
                 throw new DAOException(message);

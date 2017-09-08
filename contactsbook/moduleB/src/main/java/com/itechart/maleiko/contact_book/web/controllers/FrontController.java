@@ -40,7 +40,7 @@ public class FrontController extends HttpServlet {
             Command command = commandFactory.getCommand(request.getPathInfo());
             try {
                 command.execute(request, response);
-            }catch(RuntimeException e){
+            }catch (RuntimeException e){
                 LOGGER.error("{}", e.getMessage());
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }

@@ -21,7 +21,8 @@ public class PhoneNumberDAOImpl implements PhoneNumberDAO {
     private final String DELETE_BY_ID_QUERY;
     private final String DELETE_BY_CONTACT_ID_QUERY;
     private Connection conn;
-    {
+
+    PhoneNumberDAOImpl() {
         SAVE_QUERY = "INSERT into phone_number "+
                 "(country_code, operator_code, number, type, comment, contact_id) "+
                 "VALUES (?,?,?,?,?,?)";
@@ -85,10 +86,11 @@ public class PhoneNumberDAOImpl implements PhoneNumberDAO {
         List<PhoneNumber> numbers=new ArrayList<>();
         try(PreparedStatement stmt=conn.prepareStatement(FIND_BY_CONTACT_ID_QUERY)){
             stmt.setLong(1,contactId);
-            ResultSet rs=stmt.executeQuery();
-            while(rs.next()){
-                PhoneNumber number = generateEntityObjectFromResultSetRow(rs);
-                numbers.add(number);
+            try(ResultSet rs=stmt.executeQuery()) {
+                while (rs.next()) {
+                    PhoneNumber number = generateEntityObjectFromResultSetRow(rs);
+                    numbers.add(number);
+                }
             }
         } catch (SQLException e){
             String message = "Error finding phone number by id. " +
