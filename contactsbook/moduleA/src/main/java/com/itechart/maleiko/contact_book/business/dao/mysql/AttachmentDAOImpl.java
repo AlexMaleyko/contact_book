@@ -22,25 +22,29 @@ import java.util.Properties;
 
 public class AttachmentDAOImpl implements AttachmentDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(AttachmentDAOImpl.class);
-    private final String SAVE_ATTACHMENT_QUERY;
-    private final String FIND_ATTACHMENTS_BY_CONTACT_ID_QUERY;
-    private final String FIND_ATTACHMENT_FILE_PATH_QUERY;
-    private final String FIND_ATTACHMENTS_FILE_PATH_BY_CONTACT_ID_QUERY;
-    private final String DELETE_ATTACHMENTS_BY_CONTACT_ID_QUERY;
-    private final String DELETE_ATTACHMENT_BY_ID_QUERY;
-    private final String UPDATE_ATTACHMENT_QUERY;
-    private Connection conn;
 
-    AttachmentDAOImpl(){
-        SAVE_ATTACHMENT_QUERY = "INSERT INTO attachment (file_path, file_name, comment, contact_id) VALUES (?, ?, ?, ?)";
-        FIND_ATTACHMENTS_BY_CONTACT_ID_QUERY = "SELECT attachment_id, file_path, file_name, upload_date, comment " +
-                "FROM attachment WHERE contact_id= ? AND deletion_date IS NULL";
-        FIND_ATTACHMENT_FILE_PATH_QUERY = "SELECT file_path FROM attachment WHERE attachment_id in ";
-        FIND_ATTACHMENTS_FILE_PATH_BY_CONTACT_ID_QUERY = "SELECT file_path FROM attachment WHERE contact_id=?";
-        DELETE_ATTACHMENTS_BY_CONTACT_ID_QUERY = "UPDATE attachment SET deletion_date=CURRENT_TIMESTAMP WHERE contact_id=?";
-        DELETE_ATTACHMENT_BY_ID_QUERY = "UPDATE attachment SET deletion_date=CURRENT_TIMESTAMP WHERE attachment_id=?";
-        UPDATE_ATTACHMENT_QUERY = "UPDATE attachment SET file_name=?, comment=? WHERE attachment_id=?";
-    }
+    private static final String SAVE_ATTACHMENT_QUERY =
+            "INSERT INTO attachment (file_path, file_name, comment, contact_id) VALUES (?, ?, ?, ?)";
+
+    private static final String FIND_ATTACHMENTS_BY_CONTACT_ID_QUERY =
+            "SELECT attachment_id, file_path, file_name, upload_date, comment " +
+            "FROM attachment WHERE contact_id = ? AND deletion_date IS NULL";
+
+    private static final String FIND_ATTACHMENT_FILE_PATH_QUERY =
+            "SELECT file_path FROM attachment WHERE attachment_id in ";
+
+    private static final String FIND_ATTACHMENTS_FILE_PATH_BY_CONTACT_ID_QUERY =
+            "SELECT file_path FROM attachment WHERE contact_id=?";
+
+    private static final String DELETE_ATTACHMENTS_BY_CONTACT_ID_QUERY =
+            "UPDATE attachment SET deletion_date=CURRENT_TIMESTAMP WHERE contact_id=?";
+
+    private static final String DELETE_ATTACHMENT_BY_ID_QUERY =
+            "UPDATE attachment SET deletion_date=CURRENT_TIMESTAMP WHERE attachment_id=?";
+    private static final String UPDATE_ATTACHMENT_QUERY =
+            "UPDATE attachment SET file_name=?, comment=? WHERE attachment_id=?";
+
+    private Connection conn;
 
     public void setConnection(Connection conn) {
         this.conn = conn;

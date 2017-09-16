@@ -1,5 +1,6 @@
 package com.itechart.maleiko.contact_book.business.dao;
 
+import com.itechart.maleiko.contact_book.business.dao.exceptions.DataSourceInitializationException;
 import com.itechart.maleiko.contact_book.business.dao.exceptions.UnsupportedDBMSException;
 import com.itechart.maleiko.contact_book.business.dao.mysql.MySQLDAOFactory;
 
@@ -43,7 +44,7 @@ public class DAOFactoryProducer {
         try{
             properties.load(inputStream);
         }catch (IOException e){
-            throw new RuntimeException("Can not determine current DBMS");
+            throw new DataSourceInitializationException("Can not determine current DBMS");
         }
         return properties.getProperty("currentDBMS").toLowerCase();
     }

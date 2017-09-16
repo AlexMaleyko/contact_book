@@ -195,11 +195,15 @@ public class EditContact implements Command {
                 contactDTO.setBirth(birth);
             }
             else if(StringUtils.isNotBlank(dd) || StringUtils.isNotBlank(mm) || StringUtils.isNotBlank(yyyy)){
-                throw new RuntimeException("You didn't complete all date fields");
+                LOGGER.error("Not all date fields were filled");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
             }
             if(profileImage != null) {
                 if (profileImage.getSize() > Long.parseLong(properties.getProperty("maxImageSize"))) {
-                    throw new RuntimeException("You exceeded image size limit");
+                    LOGGER.error("Image size exceeded");
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    return;
                 }
                 contactDTO.setProfileImage(profileImage);
             }

@@ -15,27 +15,26 @@ import java.util.List;
 
 public class PhoneNumberDAOImpl implements PhoneNumberDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(PhoneNumberDAOImpl.class);
-    private final String SAVE_QUERY;
-    private final String FIND_BY_CONTACT_ID_QUERY;
-    private final String UPDATE_QUERY;
-    private final String DELETE_BY_ID_QUERY;
-    private final String DELETE_BY_CONTACT_ID_QUERY;
+
     private Connection conn;
 
-    PhoneNumberDAOImpl() {
-        SAVE_QUERY = "INSERT into phone_number "+
+    private static final String SAVE_QUERY = "INSERT into phone_number "+
                 "(country_code, operator_code, number, type, comment, contact_id) "+
                 "VALUES (?,?,?,?,?,?)";
-        FIND_BY_CONTACT_ID_QUERY = "SELECT number_id, country_code, operator_code, number,type, comment, contact_id "+
+
+    private static final String FIND_BY_CONTACT_ID_QUERY =
+            "SELECT number_id, country_code, operator_code, number,type, comment, contact_id "+
                 "FROM phone_number WHERE contact_id = ? AND deletion_date IS NULL";
-        UPDATE_QUERY = "UPDATE phone_number "+
+
+    private static final String UPDATE_QUERY = "UPDATE phone_number "+
                 "SET country_code = ?, operator_code = ?, number = ?, type = ?, comment = ? "+
                 "WHERE number_id = ?";
-        DELETE_BY_ID_QUERY =
+
+    private static final String DELETE_BY_ID_QUERY =
                 "UPDATE phone_number SET deletion_date = CURRENT_TIMESTAMP WHERE number_id = ?";
-        DELETE_BY_CONTACT_ID_QUERY =
+
+    private static final String DELETE_BY_CONTACT_ID_QUERY =
                 "UPDATE phone_number SET deletion_date = CURRENT_TIMESTAMP WHERE contact_id = ?";
-    }
 
     public void setConnection(Connection connection){
         this.conn = connection;

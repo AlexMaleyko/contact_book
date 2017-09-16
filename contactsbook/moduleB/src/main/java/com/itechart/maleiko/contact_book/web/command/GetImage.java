@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class GetImage implements Command{
-    private final Logger LOGGER = LoggerFactory.getLogger(GetImage.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GetImage.class);
     private ContactController contactController;
 
     public GetImage(ContactController contactController) {

@@ -23,63 +23,58 @@ import java.sql.Date;
 import java.util.*;
 
 public class ContactDAOImpl implements ContactDAO {
-    private final String FILE_STORAGE_PROPERTIES_FILE_NAME;
-    private final String FIND_ALL_CONTACTS_QUERY;
-    private final String FIND_ALL_CONTACTS_SORT_AND_LIMIT_QUERY;
-    private final String FIND_CONTACT_BY_ID_QUERY;
-    private final String FIND_IMAGE_PATH_BY_CONTACT_ID_QUERY;
-    private final String SET_IMAGE_PATH_TO_NULL_QUERY;
-    private final String SAVE_CONTACT_QUERY;
-    private final String DELETE_CONTACT_BY_ID_QUERY;
-    private final String UPDATE_CONTACT_BY_ID_QUERY;
-    private final String UPDATE_IMAGE_PATH_QUERY;
-    private final String COUNT_NOT_DELETED_CONTACTS_QUERY;
     private Connection conn;
     private AttachmentDAOImpl attachmentDAO;
     private PhoneNumberDAOImpl phoneNumberDAO;
 
-    ContactDAOImpl(){
-        FILE_STORAGE_PROPERTIES_FILE_NAME = "fileStorage.properties";
+    private static final String FILE_STORAGE_PROPERTIES_FILE_NAME = "fileStorage.properties";
 
-        FIND_ALL_CONTACTS_QUERY = "SELECT contact_id, name, surname, patronymic, birth, " +
-                "gender, citizenship, marital_status, website, email, " +
-                "job, country, city, street, postal_code, profile_picture " +
-                "FROM contact WHERE deletion_date IS NULL ";
+    private static final String FIND_ALL_CONTACTS_QUERY =
+            "SELECT contact_id, name, surname, patronymic, birth, " +
+                    "gender, citizenship, marital_status, website, email, " +
+                    "job, country, city, street, postal_code, profile_picture " +
+                    "FROM contact WHERE deletion_date IS NULL ";
 
-        FIND_ALL_CONTACTS_SORT_AND_LIMIT_QUERY = "SELECT contact_id, name, surname, patronymic, birth, " +
-                "gender, citizenship, marital_status, website, email, " +
-                "job, country, city, street, postal_code, profile_picture " +
-                "FROM contact WHERE deletion_date IS NULL ORDER BY surname, name, patronymic ASC LIMIT ?, ?";
+    private static final String FIND_ALL_CONTACTS_SORT_AND_LIMIT_QUERY =
+            "SELECT contact_id, name, surname, patronymic, birth, " +
+                    "gender, citizenship, marital_status, website, email, " +
+                    "job, country, city, street, postal_code, profile_picture " +
+                    "FROM contact WHERE deletion_date IS NULL ORDER BY surname, name, patronymic ASC LIMIT ?, ?";
 
-        FIND_CONTACT_BY_ID_QUERY = "SELECT contact_id, name, surname, patronymic, birth, " +
-                "gender, citizenship, marital_status, website, email, " +
-                "job, country, city, street, postal_code, profile_picture " +
-                "FROM contact WHERE contact_id = ?  AND deletion_date IS NULL";
+    private static final String FIND_CONTACT_BY_ID_QUERY =
+            "SELECT contact_id, name, surname, patronymic, birth, " +
+                    "gender, citizenship, marital_status, website, email, " +
+                    "job, country, city, street, postal_code, profile_picture " +
+                    "FROM contact WHERE contact_id = ?  AND deletion_date IS NULL";
 
-        FIND_IMAGE_PATH_BY_CONTACT_ID_QUERY = "SELECT profile_picture FROM contact WHERE  contact_id in ";
+    private static final String FIND_IMAGE_PATH_BY_CONTACT_ID_QUERY =
+            "SELECT profile_picture FROM contact WHERE  contact_id in ";
 
-        SET_IMAGE_PATH_TO_NULL_QUERY = "UPDATE contact SET profile_picture = NULL WHERE contact_id = ?";
+    private static final String SET_IMAGE_PATH_TO_NULL_QUERY =
+            "UPDATE contact SET profile_picture = NULL WHERE contact_id = ?";
 
-        SAVE_CONTACT_QUERY = "INSERT  INTO contact (name, surname, patronymic, birth, gender, citizenship, " +
-                "marital_status, website, email, job, country, city, street, postal_code) " +
-                "VALUES (/*1 name*/ ?, /*2 surname*/ ?, /*3 patronymic*/ ?, /*4 birth*/ ?, " +
-                "/*5 gender*/ ?, /*6 citizenship*/ ?, /*7 marital_status*/ ?, /*8 website*/ ?, /*9 email*/ ?, " +
-                "/*10 job*/ ?, /*11 country*/ ?, /* 12 city*/ ?, /*13 street*/ ?, /*14 postal_code*/ ?)";
+    private static final String SAVE_CONTACT_QUERY =
+            "INSERT  INTO contact (name, surname, patronymic, birth, gender, citizenship, " +
+                    "marital_status, website, email, job, country, city, street, postal_code) " +
+                    "VALUES (/*1 name*/ ?, /*2 surname*/ ?, /*3 patronymic*/ ?, /*4 birth*/ ?, " +
+                    "/*5 gender*/ ?, /*6 citizenship*/ ?, /*7 marital_status*/ ?, /*8 website*/ ?, /*9 email*/ ?, " +
+                    "/*10 job*/ ?, /*11 country*/ ?, /* 12 city*/ ?, /*13 street*/ ?, /*14 postal_code*/ ?)";
 
-        DELETE_CONTACT_BY_ID_QUERY = "UPDATE contact SET deletion_date=CURRENT_TIMESTAMP WHERE contact_id=?";
+    private static final String DELETE_CONTACT_BY_ID_QUERY =
+            "UPDATE contact SET deletion_date=CURRENT_TIMESTAMP WHERE contact_id=?";
 
-        UPDATE_CONTACT_BY_ID_QUERY = "UPDATE contact " +
-                "SET name=?, surname=?, patronymic=?, birth= ? , gender=?, citizenship=?, marital_status=?," +
-                " website=?, email=?, job=?, country=?, city=?, street=?, postal_code=?" +
-                "WHERE contact_id=?";
+    private static final String UPDATE_CONTACT_BY_ID_QUERY = "UPDATE contact " +
+            "SET name=?, surname=?, patronymic=?, birth= ? , gender=?, citizenship=?, marital_status=?," +
+            " website=?, email=?, job=?, country=?, city=?, street=?, postal_code=?" +
+            "WHERE contact_id=?";
 
-        UPDATE_IMAGE_PATH_QUERY = "UPDATE contact SET profile_picture = ?  WHERE contact_id = ?";
+    private static final String UPDATE_IMAGE_PATH_QUERY =
+            "UPDATE contact SET profile_picture = ?  WHERE contact_id = ?";
 
-        COUNT_NOT_DELETED_CONTACTS_QUERY = "SELECT COUNT(*) FROM contact WHERE deletion_date IS NULL ";
-    }
+    private static final String COUNT_NOT_DELETED_CONTACTS_QUERY =
+            "SELECT COUNT(*) FROM contact WHERE deletion_date IS NULL ";
 
     ContactDAOImpl(AttachmentDAOImpl attachmentDAO, PhoneNumberDAOImpl phoneNumberDAO) {
-        this();
         this.attachmentDAO = attachmentDAO;
         this.phoneNumberDAO = phoneNumberDAO;
     }
@@ -114,7 +109,7 @@ public class ContactDAOImpl implements ContactDAO {
         try (PreparedStatement stmt = conn.prepareStatement(FIND_ALL_CONTACTS_SORT_AND_LIMIT_QUERY)) {
             stmt.setInt(1, skip);
             stmt.setInt(2, limit);
-            try(ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Contact contact = generateEntityObjectFromResultSetRow(rs);
                     contacts.add(contact);
@@ -133,7 +128,7 @@ public class ContactDAOImpl implements ContactDAO {
         Contact contact = null;
         try (PreparedStatement stmt = conn.prepareStatement(FIND_CONTACT_BY_ID_QUERY)) {
             stmt.setLong(1, id);
-            try(ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     contact = generateEntityObjectFromResultSetRow(rs);
                 }
@@ -293,7 +288,7 @@ public class ContactDAOImpl implements ContactDAO {
         String processedQuery = fillSqlInOperatorWithPlaceholders(ids.size(), FIND_IMAGE_PATH_BY_CONTACT_ID_QUERY);
         try (PreparedStatement getPaths = conn.prepareStatement(processedQuery)) {
             supplyIdsForPreparedStatement(getPaths, ids);
-            try(ResultSet rs = getPaths.executeQuery()) {
+            try (ResultSet rs = getPaths.executeQuery()) {
                 while (rs.next()) {
                     fullPaths.add(rs.getString(1));
                 }
@@ -410,13 +405,13 @@ public class ContactDAOImpl implements ContactDAO {
                         rsSize.setString(i, "%" + (String) preparedParameters.get(i) + "%");
                     }
                 }
-                try(ResultSet rs = stmt.executeQuery()) {
+                try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         Contact contact = generateEntityObjectFromResultSetRow(rs);
                         contactList.add(contact);
                     }
                 }
-                try(ResultSet size = rsSize.executeQuery()) {
+                try (ResultSet size = rsSize.executeQuery()) {
                     size.next();
                     long rowNumber = size.getLong(1);
                     pair.setResultSetSize(rowNumber);
